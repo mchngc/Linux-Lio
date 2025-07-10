@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Linux-IO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="#">Linux-IO</a>
+    </div>
+    <nav>
+      <ul>
+        <li class="dropdown-parent">
+          <a href="#" id="code-toggle">Code</a>
+          <ul class="dropdown">
+            <li><a href="https://github.com/open-iscsi/targetcli-fb/" target="_blank">targetcli</a></li>
+            <li><a href="https://github.com/open-iscsi/rtslib-fb/" target="_blank">rtslib</a></li>
+          </ul>
+        </li>
+        <li><a href="LinuxLioDoc.html">Documentation</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <p>This is the main LIO page.</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/LIO-Architecture.png/330px-LIO-Architecture.png" alt="LIO Architecture Diagram">
+  </main>
+
+  <script>
+    const toggle = document.getElementById('code-toggle');
+    const dropdown = document.querySelector('.dropdown');
+
+    document.addEventListener('click', function (e) {
+      if (toggle.contains(e.target)) {
+        e.preventDefault();
+        dropdown.classList.toggle('open');
+      } else {
+        dropdown.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>

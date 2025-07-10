@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Linux-IO Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    main {
+      padding: 3rem 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .doc-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .doc-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .doc-card h2 {
+      font-size: 1.2rem;
+      color: #20232a;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-card p {
+      font-size: 0.95rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html">Linux-IO</a>
+    </div>
+    <nav>
+      <ul>
+        <li class="dropdown-parent">
+          <a href="#" id="code-toggle">Code</a>
+          <ul class="dropdown">
+            <li><a href="https://github.com/open-iscsi/targetcli-fb/" target="_blank">targetcli</a></li>
+            <li><a href="https://github.com/open-iscsi/rtslib-fb/" target="_blank">rtslib</a></li>
+          </ul>
+        </li>
+        <li><a href="documentation.html">Documentation</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    
+  </main>
+
+  <script>
+    const toggle = document.getElementById('code-toggle');
+    const dropdown = document.querySelector('.dropdown');
+
+    document.addEventListener('click', function (e) {
+      if (toggle.contains(e.target)) {
+        e.preventDefault();
+        dropdown.classList.toggle('open');
+      } else {
+        dropdown.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>
