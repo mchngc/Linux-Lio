@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Linux-IO Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html">Linux-IO</a>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="documentation.html">Documentation</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <h2>Docs Menu</h2>
+      <ul>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="basic-dropdown">Basic Setup</a>
+          <ul class="sidebar-dropdown" id="basic-dropdown">
+            <li><a href="basic-iscsi.html">iSCSI</a></li>
+            <li><a href="basic-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="tuning-dropdown">Tuning</a>
+          <ul class="sidebar-dropdown" id="tuning-dropdown">
+            <li><a href="tuning-iscsi.html">iSCSI</a></li>
+            <li><a href="tuning-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+
+    <section class="content">
+      <h1>Setup a vhost-scsi Device on The Host</h1>
+      <h2>Create a NULL Device for Testing</h2>
+      <p>The null-block device (/dev/nullb*) emulates a block device with a size of X GB. Its purpose is to test the different block-layer implementations. Instead of performing physical read/write operations, it simply marks them as complete as they are dequeued.</p>
+      <p>Create a null-block device /dev/nullb0:</p>
+      <pre><code>$ sudo modprobe null_blk hw_queue_depth=1024 gb=100 submit_queues=$NR_CPUS nr_devices=1 max_sectors=1024
+</code></pre>
+
+      <pre><code>Use the number of CPUs on your system for ‘submit-queues’, set size to 100GB, queue depth of 1024 commands and max IO size as 512K.</code></pre>
+      
+      <p>Confirm creation of the device</p>
+      <pre><code>$ ls -l /dev/nullb*
+brw-rw----. 1 root disk 251, 0 Jul 13 13:38 /dev/nullb0</code></pre>
+    
+<p><b>Note:</b> You can use any back end device of your choice instead of nullb0, but remember to replace nullb0 with your device when setting up the vhost-scsi target in later sections.
+
+</p>
+    <h2>Install Target Tools</h2>
+    <pre><code>$ sudo dnf install targetcli</code></pre>
+
+    <h2>Setup a vhost-scsi Target</h2>
+    <pre><code>$ targetcli</code></pre>
+
+    <p>Create a vhost-scsi target and map /dev/nullb0 to a LUN that we name disk0:</p>
+    <pre><code>/> backstores/block create name=disk0 dev=/dev/nullb0
+Created block storage object disk0 using /dev/nullb0.
+/> backstores/block/disk0 set attribute emulate_pr=0
+Parameter emulate_pr is now '0'.
+/> vhost/  create
+Created target naa.5001405b58bf97f1.
+Created TPG 1.
+/> vhost/naa.5001405b58bf97f1/tpg1/luns create /backstores/block/disk0
+Created LUN 0.
+/> exit</code></pre>
+<p>Above we performed one extra step and set emulate_pr=0. This disabled persistent reservation (PR) emulation in the target layer. Instead, the target will pass PR commands directly to the backing device. This avoids a possible performance issue that limits IOPS and throughput.
+
+</p>
+<h2>Run QEMU with a vhost-scsi device</h2>
+<p>In the example in this section, we will pass the vhost-scsi device to QEMU on the command line.
+
+</p>
+<h3>Increase Queing Limits</h3>
+<p>We want to increase the SCSI host (virtqueue_size) and logical unit (cmd_per_lun) queuing limits, so the guest can avoid waiting for free commands as much as possible. The default value for both limits is 128, and we will increase them to 1024, which is the max QEMU will allow, by adding the following to the device definition:
+
+</p>
+<pre><code>cmd_per_lun=1024,virtqueue_size=1024</code></pre>
+
+<h3>Creating a Worker Per Queue</h3>
+<p>By default, the vhost layer uses a single worker thread per device to service IO. After we increase the queuing limits, this will become a bottleneck. To be able to process all the commands a guest will now be able to send, we will enable the worker_per_virtqueue feature. Setting this variable to true will tell QEMU and the kernel to create a vhost worker thread per virtqueue.
+
+</p>
+<pre><code>worker_per_virtqueue=true</code></pre>
+
+<h3>QEMU -device Definition</h3>
+<p>Finally, to add the vhost-scsi device, wwpn=naa.5001405b58bf97f1, we made with targetcli and use the settings above, use the following with your QEMU call:
+
+</p>
+<pre><code>-device vhost-scsi-pci,wwpn=naa.5001405b58bf97f1,cmd_per_lun=1024,
+virtqueue_size=1024,worker_per_virtqueue=true</code></pre>
+
+<h3>Start QEMU</h3>
+<p>You can add the -device definition from above to an existing QEMU command and start it like normal, but you may need to increase the number of vCPUs. To take advantage of multi-queue support we need to be able to spread IO over multiple queues, so we will have to send IO from different CPUs. The minimum number of vCPUs we will want to test with is 4 and the maximum is 16.</p>
+<p>This command will create a VM with 16 vCPUs and will have 16GB of memory. It uses an Oracle Linux 9 image which we have installed the UEK-next kernel on to.
+
+</p>
+
+<pre><code>$ qemu-system-x86_64 -smp 16 -m 16G -enable-kvm -cpu host  \
+-hda /work/OL9U4_x86_64.qcow2 -name debug-threads=on \
+-serial mon:stdio -vnc :7 \
+-device vhost-scsi-pci,wwpn=naa.5001405b58bf97f1,cmd_per_lun=1024,virtqueue_size=1024,worker_per_virtqueue=true</code></pre>
+<p><b>Note:</b> Open the VNC client application and establish a connection to localhost:5907. A VM may be accessed with any VNC client program. For instance, you may utilize RealVNC or TightVNC if you’re using Windows. Use the vncviewer software that comes with your Linux distribution if you’re running Linux. Moreover, you may launch a VNC server using display number X. Replace the display number with X, so that, for example, 0 will listen on 5900, 1 on 5901, and so on.</p>
+
+<h2>Bind QEMU to CPUs</h2>
+<p>Check your system’s CPU configuration by running the lscpu -e command. On our system, CPUs 16 to 31 are on the same NUMA node and are free. Since our VM has 16 vCPUs, we’ll bind all the QEMU threads to 16 physical CPUs on the host.
+
+</p>
+<p>Run the following command on the host to bind all the QEMU threads to physical CPUs 16 to 31.</p>
+
+<pre><code>$ taskset -cp -a 16-31 &lt;QEMU-pid&gt;</code></pre>
+
+<h2>Verify Settings</h2>
+<p>Before we run IO, we will check that are our settings are being used. To get this info we need the SCSI Host number and the /dev entry on the guest. To see how the target and LUN targetcli created got mapped to the guest OS’s names/IDs run lsscsi in the VM:
+
+</p>
+<pre><code>$ lsscsi
+[0:0:1:0]    disk    LIO-ORG  disk0            4.0   /dev/sda</code></pre>
+<p>When we created the block device with targetcli we gave it the name “disk0”, and we see it above attached to [0:0:1:0]. This is [SCSI host 0: bus 0: target 1: LUN 0] and the OS’s name for the device is sda.
+
+</p>
+<p>Below we will use host0 for the SCSI Host and sda for the block device name in our commands to verify settings and for our fio tests.
+
+</p>
+<h2>Check Multi-queue is Enabled</h2>
+<p>In the VM, the command:</p>
+<pre><code>$ ls /sys/block/sda/mq
+0  1  10  11  12  13  14  15  16 2  3  4  5  6  7  8  9</code></pre>
+<p>should display a directory per CPU. In the example above, the VM has 16 CPUs so we see 0-15. Each directory represents a hardware queue, and should have a cpu_list file that prints out a single CPU that the queue is mapped to:
+
+</p>
+<pre><code>$ more /sys/block/sda/mq/*/cpu_list
+::::::::::::::
+/sys/block/sda/mq/0/cpu_list
+::::::::::::::
+0
+::::::::::::::
+/sys/block/sda/mq/1/cpu_list
+::::::::::::::
+1
+::::::::::::::
+/sys/block/sda/mq/2/cpu_list
+::::::::::::::
+2
+::::::::::::::
+/sys/block/sda/mq/3/cpu_list
+::::::::::::::
+3
+::::::::::::::
+/sys/block/sda/mq/4/cpu_list
+::::::::::::::
+4
+...</code></pre>
+
+<h2>Verify Queing Limits</h2>
+<p>To check that the new cmd_per_lun value is being used on the VM run:
+
+</p>
+
+<pre><code>$ cat /sys/block/sda/queue/nr_requests
+1024
+$ cat /sys/class/scsi_host/host0/cmd_per_lun
+1024</code></pre>
+<p>And, to check virtqueue_size run:
+
+</p>
+
+<pre><code>$ cat /sys/scsi_host/host0/can_queue
+1024</code></pre>
+
+<h2>Verify Worker Per Virtqeue</h2>
+<p>Use <code>pidstat -t -p &lt;QEMU-pid&gt; </code>to check that we have created a vhost worker thread per virtqueue.
+
+</p>
+<pre><code>pidstat -t -p 3645
+09:18:40 PM   UID      TGID       TID    %usr %system  %guest   %wait    %CPU   CPU  Command
+...
+09:18:40 PM     0         -      3651    0.14    0.06    0.08    0.00    0.28     6  |__CPU 0/KVM
+09:18:40 PM     0         -      3652    0.00    0.00    0.02    0.00    0.03    35  |__CPU 1/KVM
+09:18:40 PM     0         -      3653    0.00    0.00    0.01    0.00    0.01    17  |__CPU 2/KVM
+09:18:40 PM     0         -      3654    0.00    0.00    0.01    0.00    0.02    38  |__CPU 3/KVM
+09:18:40 PM     0         -      3655    0.00    0.00    0.01    0.00    0.01    39  |__CPU 4/KVM
+09:18:40 PM     0         -      3656    0.00    0.01    0.02    0.00    0.03     1  |__CPU 5/KVM
+09:18:40 PM     0         -      3657    0.00    0.01    0.01    0.00    0.02    12  |__CPU 6/KVM
+09:18:40 PM     0         -      3658    0.00    0.00    0.01    0.00    0.01     5  |__CPU 7/KVM
+09:18:40 PM     0         -      3659    0.00    0.00    0.02    0.00    0.03    16  |__CPU 8/KVM
+09:18:40 PM     0         -      3660    0.00    0.00    0.01    0.00    0.01    27  |__CPU 9/KVM
+09:18:40 PM     0         -      3661    0.00    0.01    0.01    0.00    0.02    19  |__CPU 10/KVM
+09:18:40 PM     0         -      3662    0.00    0.00    0.01    0.00    0.01     8  |__CPU 11/KVM
+09:18:40 PM     0         -      3663    0.00    0.00    0.01    0.00    0.02     9  |__CPU 12/KVM
+09:18:40 PM     0         -      3664    0.00    0.00    0.01    0.00    0.02    29  |__CPU 13/KVM
+09:18:40 PM     0         -      3665    0.00    0.00    0.01    0.00    0.01    14  |__CPU 14/KVM
+09:18:40 PM     0         -      3666    0.00    0.00    0.01    0.00    0.01    32  |__CPU 15/KVM
+09:18:40 PM     0         -      3668    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
+09:18:40 PM     0         -      3669    0.00    0.00    0.00    0.00    0.00    35  |__vhost-3645
+09:18:40 PM     0         -      3670    0.00    0.00    0.00    0.00    0.00    37  |__vhost-3645
+09:18:40 PM     0         -      3671    0.00    0.00    0.00    0.00    0.00    11  |__vhost-3645
+09:18:40 PM     0         -      3672    0.00    0.00    0.00    0.00    0.00     3  |__vhost-3645
+09:18:40 PM     0         -      3673    0.00    0.00    0.00    0.00    0.00     0  |__vhost-3645
+09:18:40 PM     0         -      3674    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
+09:18:40 PM     0         -      3675    0.00    0.00    0.00    0.00    0.00    26  |__vhost-3645
+09:18:40 PM     0         -      3676    0.00    0.00    0.00    0.00    0.00    28  |__vhost-3645
+09:18:40 PM     0         -      3677    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
+09:18:40 PM     0         -      3678    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
+09:18:40 PM     0         -      3679    0.00    0.00    0.00    0.00    0.00    11  |__vhost-3645
+09:18:40 PM     0         -      3680    0.00    0.00    0.00    0.00    0.00     1  |__vhost-3645
+09:18:40 PM     0         -      3681    0.00    0.00    0.00    0.00    0.00    18  |__vhost-3645
+09:18:40 PM     0         -      3682    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
+09:18:40 PM     0         -      3683    0.00    0.00    0.00    0.00    0.00    29  |__vhost-3645
+...</code></pre>
+<p>QEMU 9.0 will create a virtqueue per vCPU by default, so by setting worker_per_virtqueue to true we should see the same number of vhost and CPU threads. Above we see 16 CPU threads and 16 vhost threads, so we know the feature was setup correctly. Note that if you are not using the QEMU example command in this article, you may see more vhost threads if you are using vhost for networking or for other hardware.
+
+</p>
+
+<h1>Test It Out</h1>
+<h2>Run Fio</h2>
+<p>Run this fio workload that spread I/O across 4 queues</p>
+<pre><code>$ cat randread.4jobs.fio
+
+[global]
+bs=4K
+iodepth=128
+direct=1
+ioengine=libaio
+group_reporting
+time_based
+runtime=120
+name=standard-iops
+rw=randread
+numjobs=4
+cpus_allowed=0-3
+
+[job1]
+filename=/dev/sda
+
+$ fio randread.4jobs.fio</code></pre>
+<p>As you utilize more queues IOPS should increase close to linearly. However, depending on factors like the performance of the physical CPUs, scaling will stop before we have fio use all 16 queues we created the VM with. This is caused by the VM and vhost-scsi threads sharing the same physical CPUs and eventually reaching 100% usage.
+
+</p>
+
+<h1>Conclusion</h1>
+<p>In this article, we saw how to setup a VM and use vhost-scsi’s worker_per_virtqueue feature that was added in QEMU 9.0 and the 6.5 Linux Kernel. By enabling this feature, applications in the guest can now execute IO through multiple queues and avoid the bottleneck that was limiting performance.
+
+</p>
+
+</section>
+  </main>
+
+  <script>
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-target');
+        const dropdown = document.getElementById(targetId);
+        dropdown.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>
