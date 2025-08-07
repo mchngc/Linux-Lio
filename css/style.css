@@ -340,4 +340,6 @@ tr:nth-child(even) {
 .notice-text {
   line-height: 1.5;
 }
-
+.content.centered {
+  text-align: center;
+}
