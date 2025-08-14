@@ -9,7 +9,7 @@
 <body>
   <header>
     <div class="logo">
-      <a href="index.html">Linux-IO</a>
+      <a href="index.html">Linux SCSI Target (LIO)</a>
     </div>
     <nav>
       <ul>
@@ -38,194 +38,151 @@
         </li>
       </ul>
     </aside>
+<section class="content">
+     <h1>vhost-scsi Setup</h1>
+<p>This document describes how to set up a vhost-scsi device using <code>virsh/libvirt</code> or by manually running QEMU.</p>
 
-    <section class="content">
-      <h1>Setup a vhost-scsi Device on The Host</h1>
-      <h2>Create a NULL Device for Testing</h2>
-      <p>The null-block device (/dev/nullb*) emulates a block device with a size of X GB. Its purpose is to test the different block-layer implementations. Instead of performing physical read/write operations, it simply marks them as complete as they are dequeued.</p>
-      <p>Create a null-block device /dev/nullb0:</p>
-      <pre><code>$ sudo modprobe null_blk hw_queue_depth=1024 gb=100 submit_queues=$NR_CPUS nr_devices=1 max_sectors=1024
+
+<h2>Host Setup</h2>
+<p>vhost-scsi combined with QEMU presents the guest a virtual SCSI controller with N LUNs that can be backed by physical NVMe drives, SAS/SATA disks, RAM disks, or any block device Linux supports.To emulate SCSI commands and interact with the backstore device, it uses the Linux kernel LIO/target layer. That target device is then passed to QEMU's vhost layer which handles communication between the guest and host. This section describes how to setup the target with targetcli, then edit a libvirt xml file so when tools like virsh start the VM they have QEMU bind the kernel's target device to the VM.</p>
+
+<h3>LIO vhost-scsi Device Initialization with targetcli</h3>
+<p>If you have already setup devices with targetcli and rebooted the system, then to re-initialize them in the kernel run:</p>
+<pre><code># targetcli restoreconfig
+  Configuration restored from /etc/target/saveconfig.json
+# targetcli ls
+</code></pre>
+<p>If you want to create new device or add more devices run targetcli to enter the shell.</p>
+
+<h3>LIO vhost-scsi Device Creation with targetcli</h3>
+<pre><code># yum install targetcli   # On Oracle Linux
+# apt-get install targetcli  # On Ubuntu
+
+# targetcli
+targetcli shell version 2.1.53
+Copyright 2011-2013 by Datera, Inc and others.
+For help on commands, type 'help'.
+/>
 </code></pre>
 
-      <pre><code>Use the number of CPUs on your system for ‘submit-queues’, set size to 100GB, queue depth of 1024 commands and max IO size as 512K.</code></pre>
-      
-      <p>Confirm creation of the device</p>
-      <pre><code>$ ls -l /dev/nullb*
-brw-rw----. 1 root disk 251, 0 Jul 13 13:38 /dev/nullb0</code></pre>
-    
-<p><b>Note:</b> You can use any back end device of your choice instead of nullb0, but remember to replace nullb0 with your device when setting up the vhost-scsi target in later sections.
-
-</p>
-    <h2>Install Target Tools</h2>
-    <pre><code>$ sudo dnf install targetcli</code></pre>
-
-    <h2>Setup a vhost-scsi Target</h2>
-    <pre><code>$ targetcli</code></pre>
-
-    <p>Create a vhost-scsi target and map /dev/nullb0 to a LUN that we name disk0:</p>
-    <pre><code>/> backstores/block create name=disk0 dev=/dev/nullb0
-Created block storage object disk0 using /dev/nullb0.
-/> backstores/block/disk0 set attribute emulate_pr=0
+<p>Create a disk that we gave the name "vol0" and is backed by the physical device /dev/nvme0n1.</p>
+<pre><code>/> ls
+o- / ................................................................................................ [...]
+  o- backstores ..................................................................................... [...]
+  | o- block ......................................................................... [Storage Objects: 0]
+  | o- fileio ........................................................................ [Storage Objects: 0]
+  | o- pscsi ......................................................................... [Storage Objects: 0]
+  | o- ramdisk ....................................................................... [Storage Objects: 0]
+  o- iscsi ................................................................................... [Targets: 0]
+  o- loopback ................................................................................ [Targets: 0]
+  o- srpt .................................................................................... [Targets: 0]
+  o- vhost ................................................................................... [Targets: 0]
+/> cd /backstores/block
+/backstores/block> create dev=/dev/nvme0n1 name=vol0
+Created block storage object vol0 using /dev/nvme0n1.
+/backstores/block> ls
+o- block ............................................................................. [Storage Objects: 1]
+  o- vol0 ................................................ [/dev/nvme0n1 (256.0GiB) write-thru deactivated]
+    o- alua .............................................................................. [ALUA Groups: 1]
+      o- default_tg_pt_gp .................................................. [ALUA state: Active/optimized]
+</code></pre>
+<p>This is cd'd to the device's configuration directory and set the emulate_pr setting to 0. This disables persistent reservation (PR) emulation in the target layer. Instead emulating PR commands in software and storing the state in memory or a local file on the system, the target will pass PR commands directly to the backing device if it supports it. If the device does not support PRs then they will be failed immediately so the application is aware of the lack of support. This avoids a possible performance issue that limits IOPS and throughput and prevents possible corruption if the application is using PRs and the VM is migrated to a different system.</p>
+<pre><code>/backstores/block> cd vol0
+/backstores/block/vol0 set attribute emulate_pr=0
 Parameter emulate_pr is now '0'.
-/> vhost/  create
-Created target naa.5001405b58bf97f1.
+/backstores/block/vol0> info
+dev: /dev/nvme0n1
+name: vol0
+plugin: block
+readonly: False
+write_back: False
+wwn: 5122f2cd-07dc-4eec-a2d4-c122db6a2a81</code></pre>
+<p>Above, we also ran the "info" command. Note that on the guest udev will use the wwn name from the info command and the device name, vol0, to create persistent names in the /dev/disk directories.
+</p>
+<p>Next, we will create the vhost-scsi target and then map vol0 to a LUN on it.</p>
+<pre><code>/backstores/block/vol0> cd /vhost
+/vhost> create naa.1111111111111111
+Created target naa.1111111111111111.
 Created TPG 1.
-/> vhost/naa.5001405b58bf97f1/tpg1/luns create /backstores/block/disk0
-Created LUN 0.
-/> exit</code></pre>
-<p>Above we performed one extra step and set emulate_pr=0. This disabled persistent reservation (PR) emulation in the target layer. Instead, the target will pass PR commands directly to the backing device. This avoids a possible performance issue that limits IOPS and throughput.
-
+/vhost> ls
+o- vhost ..................................................................................... [Targets: 1]
+  o- naa.1111111111111111 ....................................................................... [TPGs: 1]
+    o- tpg1 ........................................................... [naa.50014052bee3f148, no-gen-acls]
+      o- acls ................................................................................... [ACLs: 0]
+      o- luns ................................................................................... [LUNs: 0]
+/vhost> cd naa.1111111111111111/tpg1/luns
+/vhost/naa.11...111/tpg1/luns> create /backstores/block/vol0
+Created LUN 0.</code></pre>
+<p>Above, we cd'd to the vhost directory, then used the "create" command to create a vhost-scsi device we gave the name "naa.1111111111111111". We then cd'd to the luns directory and mapped vol0 to LUN 0. If you don't pass in a LUN value to the create command the next available one is assigned.</p>
+<p>You can now, create more disks and map them to LUNs on the same vhost-scsi device or create more disks and vhost-scsi devices.</p>
+<p>When you are done creating disks/targets, you can run "exit". The configuration will be saved in /etc/target/saveconfig.json. When the system is rebooted you can run "targetcli restoreconfig" to load the disks and targets back into the kernel.</p>
+<pre><code>/vhost/naa.11...111/tpg1/luns> exit
+Global pref auto_save_on_exit=true
+Last 10 configs saved in /etc/target/backup/.
+Configuration saved to /etc/target/saveconfig.json</code></pre>
+<h2>Prepare and Start the Guest</h2>
+<p>Now that the vhost-scsi target is setup, we must setup the guest to use it. This section will describe how to do it with virsh/libvirt or by passing it to QEMU on the command line.
 </p>
-<h2>Run QEMU with a vhost-scsi device</h2>
-<p>In the example in this section, we will pass the vhost-scsi device to QEMU on the command line.
+<h3>Using virsh</h3>
+<p>This section assumes you have installed libvirt and virsh and have a guest created already. List using existing VMs:</p>
+<pre><code># virsh list --all
+ Id   Name                              State
+--------------------------------------------------
+-    nshqat05adm02vm01.us.oracle.com
+-    nshqat05adm02vm02.us.oracle.com
+-    nshqat05adm02vm03.us.oracle.com
+shut off
+shut off
+shut off
+</code></pre>
+<p>Run virsh to edit one of the VMs listed:</p>
+<pre><code># virsh edit nshqat35adm02vm03.us.oracle.com</code></pre>
+<h3>Add Device To Guest Definition</h3>
+<p>In the devices section we added a scsi_host hostdev using the name we gave our vhost-scsi target naa.1111111111111111.</p>
 
-</p>
-<h3>Increase Queing Limits</h3>
-<p>We want to increase the SCSI host (virtqueue_size) and logical unit (cmd_per_lun) queuing limits, so the guest can avoid waiting for free commands as much as possible. The default value for both limits is 128, and we will increase them to 1024, which is the max QEMU will allow, by adding the following to the device definition:
+<pre><code>&lt;domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'&gt;
+...
+        &lt;devices&gt;
+        ...
+                &lt;hostdev mode='subsystem' type='scsi_host' managed='no'&gt;
+                        &lt;source protocol='vhost' wwpn='naa.1111111111111111'/&gt;
+            &lt;/hostdev&gt;
+        ...
+        &lt;/devices&gt;
+&lt;/domain&gt;
+</code></pre>
+<h2>Start Guest</h2>
+<pre><code># virsh start nshqat35adm02vm03.us.oracle.com</code></pre>
+<h3>Prepare and Start the Guest Manually</h3>
+<p>This section assumes you have installed QEMU.</p>
+<h4>QEMU -device Definition</h4>
+<p>To add the vhost-scsi device, wwpn=naa.1111111111111111, we made with targetcli use the following device definition with your QEMU call:</p>
+<pre><code>-device vhost-scsi-pci,wwpn=naa.1111111111111111</code></pre>
+<h3>Using QEMU</h3>
+<p>
+This command will create a VM with 16 vCPUs and will have 16GB of memory. It uses an Oracle Linux 9 image which we have installed the UEK-next kernel on to.</p>
 
-</p>
-<pre><code>cmd_per_lun=1024,virtqueue_size=1024</code></pre>
-
-<h3>Creating a Worker Per Queue</h3>
-<p>By default, the vhost layer uses a single worker thread per device to service IO. After we increase the queuing limits, this will become a bottleneck. To be able to process all the commands a guest will now be able to send, we will enable the worker_per_virtqueue feature. Setting this variable to true will tell QEMU and the kernel to create a vhost worker thread per virtqueue.
-
-</p>
-<pre><code>worker_per_virtqueue=true</code></pre>
-
-<h3>QEMU -device Definition</h3>
-<p>Finally, to add the vhost-scsi device, wwpn=naa.5001405b58bf97f1, we made with targetcli and use the settings above, use the following with your QEMU call:
-
-</p>
-<pre><code>-device vhost-scsi-pci,wwpn=naa.5001405b58bf97f1,cmd_per_lun=1024,
-virtqueue_size=1024,worker_per_virtqueue=true</code></pre>
-
-<h3>Start QEMU</h3>
-<p>You can add the -device definition from above to an existing QEMU command and start it like normal, but you may need to increase the number of vCPUs. To take advantage of multi-queue support we need to be able to spread IO over multiple queues, so we will have to send IO from different CPUs. The minimum number of vCPUs we will want to test with is 4 and the maximum is 16.</p>
-<p>This command will create a VM with 16 vCPUs and will have 16GB of memory. It uses an Oracle Linux 9 image which we have installed the UEK-next kernel on to.
-
-</p>
-
-<pre><code>$ qemu-system-x86_64 -smp 16 -m 16G -enable-kvm -cpu host  \
+<pre><code>$ qemu-system-x86_64 -smp 16 -m 16G -enable-kvm -cpu host \
 -hda /work/OL9U4_x86_64.qcow2 -name debug-threads=on \
 -serial mon:stdio -vnc :7 \
--device vhost-scsi-pci,wwpn=naa.5001405b58bf97f1,cmd_per_lun=1024,virtqueue_size=1024,worker_per_virtqueue=true</code></pre>
-<p><b>Note:</b> Open the VNC client application and establish a connection to localhost:5907. A VM may be accessed with any VNC client program. For instance, you may utilize RealVNC or TightVNC if you’re using Windows. Use the vncviewer software that comes with your Linux distribution if you’re running Linux. Moreover, you may launch a VNC server using display number X. Replace the display number with X, so that, for example, 0 will listen on 5900, 1 on 5901, and so on.</p>
+-device vhost-scsi-pci,wwpn=naa.1111111111111111
+</code></pre>
+<p>Note:Open the VNC client application and establish a connection to localhost:5907. A VM may be accessed with any VNC client program. For instance, you may utilize RealVNC or TightVNC if you’re using Windows. Use the vncviewer software that comes with your Linux distribution if you’re running Linux. Moreover, you may launch a VNC server using display number X. Replace the display number with X, so that, for example, 0 will listen on 5900, 1 on 5901, and so on.
+ </p>
 
-<h2>Bind QEMU to CPUs</h2>
-<p>Check your system’s CPU configuration by running the lscpu -e command. On our system, CPUs 16 to 31 are on the same NUMA node and are free. Since our VM has 16 vCPUs, we’ll bind all the QEMU threads to 16 physical CPUs on the host.
-
-</p>
-<p>Run the following command on the host to bind all the QEMU threads to physical CPUs 16 to 31.</p>
-
-<pre><code>$ taskset -cp -a 16-31 &lt;QEMU-pid&gt;</code></pre>
-
-<h2>Verify Settings</h2>
-<p>Before we run IO, we will check that are our settings are being used. To get this info we need the SCSI Host number and the /dev entry on the guest. To see how the target and LUN targetcli created got mapped to the guest OS’s names/IDs run lsscsi in the VM:
-
-</p>
+<h2>Check Your Guest</h2>
+<p>To see how the target and LUN targetcli created got mapped to the guest OS’s names/IDs run lsscsi in the VM:</p>
 <pre><code>$ lsscsi
-[0:0:1:0]    disk    LIO-ORG  disk0            4.0   /dev/sda</code></pre>
-<p>When we created the block device with targetcli we gave it the name “disk0”, and we see it above attached to [0:0:1:0]. This is [SCSI host 0: bus 0: target 1: LUN 0] and the OS’s name for the device is sda.
-
+[0:0:1:0]    disk    LIO-ORG  vol0  4.0   /dev/sda
+</code></pre>
+<p>When we created the block device with targetcli we gave it the name “vol0", and we see it above attached to [0:0:1:0]. This is [SCSI host 0: bus 0: target 1: LUN 0] and the OS’s name for the device is sda.</p>
+<p>Instead of sda, we can prevent ourself from overwriting our root disk or wasting a lot of time performing tests on the wrong disk by using the udev name. From the targetcli info command we saw that the wwn for the disk was 5122f2cd-07dc-4eec-a2d4-c122db6a2a81, so in the /dev/disk/by-id dir you will find:
 </p>
-<p>Below we will use host0 for the SCSI Host and sda for the block device name in our commands to verify settings and for our fio tests.
-
-</p>
-<h2>Check Multi-queue is Enabled</h2>
-<p>In the VM, the command:</p>
-<pre><code>$ ls /sys/block/sda/mq
-0  1  10  11  12  13  14  15  16 2  3  4  5  6  7  8  9</code></pre>
-<p>should display a directory per CPU. In the example above, the VM has 16 CPUs so we see 0-15. Each directory represents a hardware queue, and should have a cpu_list file that prints out a single CPU that the queue is mapped to:
-
-</p>
-<pre><code>$ more /sys/block/sda/mq/*/cpu_list
-::::::::::::::
-/sys/block/sda/mq/0/cpu_list
-::::::::::::::
-0
-::::::::::::::
-/sys/block/sda/mq/1/cpu_list
-::::::::::::::
-1
-::::::::::::::
-/sys/block/sda/mq/2/cpu_list
-::::::::::::::
-2
-::::::::::::::
-/sys/block/sda/mq/3/cpu_list
-::::::::::::::
-3
-::::::::::::::
-/sys/block/sda/mq/4/cpu_list
-::::::::::::::
-4
-...</code></pre>
-
-<h2>Verify Queing Limits</h2>
-<p>To check that the new cmd_per_lun value is being used on the VM run:
-
-</p>
-
-<pre><code>$ cat /sys/block/sda/queue/nr_requests
-1024
-$ cat /sys/class/scsi_host/host0/cmd_per_lun
-1024</code></pre>
-<p>And, to check virtqueue_size run:
-
-</p>
-
-<pre><code>$ cat /sys/scsi_host/host0/can_queue
-1024</code></pre>
-
-<h2>Verify Worker Per Virtqeue</h2>
-<p>Use <code>pidstat -t -p &lt;QEMU-pid&gt; </code>to check that we have created a vhost worker thread per virtqueue.
-
-</p>
-<pre><code>pidstat -t -p 3645
-09:18:40 PM   UID      TGID       TID    %usr %system  %guest   %wait    %CPU   CPU  Command
-...
-09:18:40 PM     0         -      3651    0.14    0.06    0.08    0.00    0.28     6  |__CPU 0/KVM
-09:18:40 PM     0         -      3652    0.00    0.00    0.02    0.00    0.03    35  |__CPU 1/KVM
-09:18:40 PM     0         -      3653    0.00    0.00    0.01    0.00    0.01    17  |__CPU 2/KVM
-09:18:40 PM     0         -      3654    0.00    0.00    0.01    0.00    0.02    38  |__CPU 3/KVM
-09:18:40 PM     0         -      3655    0.00    0.00    0.01    0.00    0.01    39  |__CPU 4/KVM
-09:18:40 PM     0         -      3656    0.00    0.01    0.02    0.00    0.03     1  |__CPU 5/KVM
-09:18:40 PM     0         -      3657    0.00    0.01    0.01    0.00    0.02    12  |__CPU 6/KVM
-09:18:40 PM     0         -      3658    0.00    0.00    0.01    0.00    0.01     5  |__CPU 7/KVM
-09:18:40 PM     0         -      3659    0.00    0.00    0.02    0.00    0.03    16  |__CPU 8/KVM
-09:18:40 PM     0         -      3660    0.00    0.00    0.01    0.00    0.01    27  |__CPU 9/KVM
-09:18:40 PM     0         -      3661    0.00    0.01    0.01    0.00    0.02    19  |__CPU 10/KVM
-09:18:40 PM     0         -      3662    0.00    0.00    0.01    0.00    0.01     8  |__CPU 11/KVM
-09:18:40 PM     0         -      3663    0.00    0.00    0.01    0.00    0.02     9  |__CPU 12/KVM
-09:18:40 PM     0         -      3664    0.00    0.00    0.01    0.00    0.02    29  |__CPU 13/KVM
-09:18:40 PM     0         -      3665    0.00    0.00    0.01    0.00    0.01    14  |__CPU 14/KVM
-09:18:40 PM     0         -      3666    0.00    0.00    0.01    0.00    0.01    32  |__CPU 15/KVM
-09:18:40 PM     0         -      3668    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
-09:18:40 PM     0         -      3669    0.00    0.00    0.00    0.00    0.00    35  |__vhost-3645
-09:18:40 PM     0         -      3670    0.00    0.00    0.00    0.00    0.00    37  |__vhost-3645
-09:18:40 PM     0         -      3671    0.00    0.00    0.00    0.00    0.00    11  |__vhost-3645
-09:18:40 PM     0         -      3672    0.00    0.00    0.00    0.00    0.00     3  |__vhost-3645
-09:18:40 PM     0         -      3673    0.00    0.00    0.00    0.00    0.00     0  |__vhost-3645
-09:18:40 PM     0         -      3674    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
-09:18:40 PM     0         -      3675    0.00    0.00    0.00    0.00    0.00    26  |__vhost-3645
-09:18:40 PM     0         -      3676    0.00    0.00    0.00    0.00    0.00    28  |__vhost-3645
-09:18:40 PM     0         -      3677    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
-09:18:40 PM     0         -      3678    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
-09:18:40 PM     0         -      3679    0.00    0.00    0.00    0.00    0.00    11  |__vhost-3645
-09:18:40 PM     0         -      3680    0.00    0.00    0.00    0.00    0.00     1  |__vhost-3645
-09:18:40 PM     0         -      3681    0.00    0.00    0.00    0.00    0.00    18  |__vhost-3645
-09:18:40 PM     0         -      3682    0.00    0.00    0.00    0.00    0.00    10  |__vhost-3645
-09:18:40 PM     0         -      3683    0.00    0.00    0.00    0.00    0.00    29  |__vhost-3645
-...</code></pre>
-<p>QEMU 9.0 will create a virtqueue per vCPU by default, so by setting worker_per_virtqueue to true we should see the same number of vhost and CPU threads. Above we see 16 CPU threads and 16 vhost threads, so we know the feature was setup correctly. Note that if you are not using the QEMU example command in this article, you may see more vhost threads if you are using vhost for networking or for other hardware.
-
-</p>
-
-<h1>Test It Out</h1>
-<h2>Run Fio</h2>
-<p>Run this fio workload that spread I/O across 4 queues</p>
-<pre><code>$ cat randread.4jobs.fio
-
+<pre><code>$ ls -l /dev/disk/by-id/scsi-1LIO-ORG_vol0:5122f2cd-07dc-4eec-a2d4-c122db6a2a81
+</code></pre>
+<p>and you use the "/dev/disk/by-id/scsi-1LIO-ORG_vol0:5122f2cd-07dc-4eec-a2d4-c122db6a2a81" name across reboots (warning that some apps don't like the ":" so you may need to do "\:").</p>
+<h2>Test It Out</h2>
+<pre><code>$$ cat randread.4jobs.fio
 [global]
 bs=4K
 iodepth=128
@@ -238,21 +195,21 @@ name=standard-iops
 rw=randread
 numjobs=4
 cpus_allowed=0-3
-
 [job1]
-filename=/dev/sda
+# note: some applications don't like the colon in the name so you have to add the backslash
+filename=/dev/disk/by-id/scsi-1LIO-ORG_vol0\:5122f2cd-07dc-4eec-a2d4-c122db6a2a81
+$ fio randread.4jobs.fio
+</code></pre>
 
-$ fio randread.4jobs.fio</code></pre>
-<p>As you utilize more queues IOPS should increase close to linearly. However, depending on factors like the performance of the physical CPUs, scaling will stop before we have fio use all 16 queues we created the VM with. This is caused by the VM and vhost-scsi threads sharing the same physical CPUs and eventually reaching 100% usage.
-
-</p>
-
-<h1>Conclusion</h1>
-<p>In this article, we saw how to setup a VM and use vhost-scsi’s worker_per_virtqueue feature that was added in QEMU 9.0 and the 6.5 Linux Kernel. By enabling this feature, applications in the guest can now execute IO through multiple queues and avoid the bottleneck that was limiting performance.
-
-</p>
+<p>Reference links:</p>
+<ul>
+    <li><a href="https://blogs.oracle.com/linux/post/improving-paravirtualized-iscsi-performance">Improving Paravirtualized iSCSI Performance</a></li>
+    <li><a href="https://wiki.libvirt.org/Vhost-scsi_target.html">Libvirt Vhost-scsi Wiki</a></li>
+    <li><a href="https://yum.oracle.com/oracle-linux-templates.html">Oracle Linux Templates</a></li>
+</ul>
 
 </section>
+
   </main>
 
   <script>
@@ -265,5 +222,15 @@ $ fio randread.4jobs.fio</code></pre>
       });
     });
   </script>
+  <footer>
+    <p>This page is based on
+      <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+      .Thanks to Nicholas Bellinger for creating LIO and the original <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+    </p>
+  </footer>
 </body>
 </html>
