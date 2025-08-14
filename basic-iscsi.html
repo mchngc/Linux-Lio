@@ -9,7 +9,7 @@
 <body>
   <header>
     <div class="logo">
-      <a href="index.html">Linux-IO</a>
+      <a href="index.html">Linux SCSI Target (LIO)</a>
     </div>
     <nav>
       <ul>
@@ -39,22 +39,14 @@
       </ul>
     </aside>
 <section class="content">
-      <h1>ISCSI</h1>
+      <h1>iSCSI</h1>
 
       <h2>Overview</h2>
-      <p>ISCSI (Internet Small Computer System Interface) provides SCSI access over IP networks</p>
+      <p>iSCSI (Internet Small Computer System Interface) provides SCSI access over IP networks</p>
       <p>iSCSI is an Internet Protocol (IP)-based storage networking standard for linking data storage facilities. By carrying SCSI commands over IP networks, iSCSI is used to facilitate data transfers over intranets and to manage storage over long distances. iSCSI can be used to transmit data over local area networks (LANs), wide area networks (WANs), or the Internet, and can enable location-independent data storage and retrieval.</p>
       <p>iSCSI allows clients (called Initiators) to send SCSI commands (CDBs) to SCSI storage devices (LinuxIOs) on remote servers. It is a popular SAN protocol, allowing organizations to consolidate storage into data center storage arrays while providing hosts (such as database and web servers) with the illusion of locally-attached disks. Unlike traditional Fibre Channel, which requires special-purpose cabling, iSCSI can be run over long distances using existing network infrastructure.</p>
       
-      <h2>Hardware support</h2>
-      <p>The following Ethernet NICs are supported:</p>
-      <ul>
-    <li>1 GbE: all usual ob-board or PCI NICs are supported. </li>
-    <li>10 GbE: the Intel Ethernet X520 Adapters are recommended.</li>
-  </ul>
-  <p>The LIO iSCSI fabric module (iscsi.ko, Linux kernel driver database) was released with Linux kernel 3.1 on October 24, 2011.[1]
-
-</p>
+      
 
 <h2>targetcli</h2>
 <p>targetcli from Datera, Inc. is used to configure LIO. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node LIO SAN configuration shell, independently of the underlying fabric(s).
@@ -626,27 +618,6 @@ Generated Target_Core_Mod config: /etc/target/backup/tcm_backup-2012-02-27_23:19
 Successfully updated default config /etc/target/lio_start.sh
 Successfully updated default config /etc/target/tcm_start.sh
 /></code></pre>
-<h2>Spec file</h2>
-<p>RTS spec files define the fabric-dependent feature set, capabilities and available target ports of the specific underlying fabric.
-
-</p>
-<p>In particular, the iSCSI spec file /var/target/fabric/iscsi.spec is included via RTSlib.
-
-</p>
-<pre><code># WARNING: This is a draft specfile supplied for demo purposes only.
-
-# The iSCSI fabric module uses the default feature set.
-features = acls, acls_auth, discovery_auth, nps, tpgts
-
-# Obviously, this module uses IQN strings as WWNs
-wwn_type = iqn
-
-# The kernel module is default
-# kernel_module = iscsi_target_mod
-
-# The configfs group name is default
-# configfs_group = iscsi
-</code></pre>
 <h2>Scripting with RTSlib</h2>
 <h2>Setup Script</h2>
 <p>The following Python code illustrates how to setup a basic iSCSI target and export a mapped LUN:
@@ -693,5 +664,15 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
       });
     });
   </script>
+  <footer>
+    <p>This page is based on
+      <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+      .Thanks to Nicholas Bellinger for creating LIO and the original <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+    </p>
+  </footer>
 </body>
 </html>
