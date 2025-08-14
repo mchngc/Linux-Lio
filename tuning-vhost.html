@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Linux-IO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="#">Linux SCSI Target (LIO)</a>
+    </div>
+    <nav>
+      <ul>
+        <li class="dropdown-parent">
+  <a href="#" id="code-toggle" class="has-dropdown">Code</a>
+  <ul class="dropdown">
+    <li><a href="https://github.com/open-iscsi/targetcli-fb/" target="_blank">targetcli</a></li>
+    <li><a href="https://github.com/open-iscsi/rtslib-fb/" target="_blank">rtslib</a></li>
+  </ul>
+</li>
+
+        <li><a href="docs.html">Documentation</a></li> 
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+   <p>Information for vhost tuning can be found on <a href="https://blogs.oracle.com/linux/post/improving-paravirtualized-iscsi-performance" target="_blank">this blog</a></p>
+  </main>
+
+  <script>
+    const toggle = document.getElementById('code-toggle');
+    const dropdown = document.querySelector('.dropdown');
+
+    document.addEventListener('click', function (e) {
+      if (toggle.contains(e.target)) {
+        e.preventDefault();
+        dropdown.classList.toggle('open');
+      } else {
+        dropdown.classList.remove('open');
+      }
+    });
+  </script>
+    <footer>
+    <p>This page is based on
+      <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+      .Thanks to Nicholas Bellinger for creating LIO and the original <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+    </p>
+  </footer>
+  
+
+</body>
+</html>
