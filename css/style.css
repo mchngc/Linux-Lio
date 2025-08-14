@@ -343,3 +343,48 @@ tr:nth-child(even) {
 .content.centered {
   text-align: center;
 }
+footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  color: #666;
+  background-color: #f9f9f9;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+/* Jump links styling (cleaner, smaller, with bullets) */
+.jump-links {
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem; /* smaller */
+  line-height: 1.4;
+}
+
+.jump-links ul {
+  list-style-type: disc;
+  padding-left: 1.2rem;
+  margin: 0;
+}
+
+.jump-links ul ul {
+  list-style-type: circle; /* Subsection bullets */
+  margin-top: 0.2rem;
+  padding-left: 1.2rem;
+}
+
+.jump-links a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+.jump-links a:hover {
+  text-decoration: underline;
+  color: #005f99;
+}
+
+
+
