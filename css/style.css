@@ -531,6 +531,59 @@ footer {
   color: var(--text-dim);
   background: #fafafa;
 }
+/* Sidebar dropdown indentation */
+.sidebar-dropdown {
+  margin-left: 1rem;   /* indent */
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border);
+}
+
+.sidebar-dropdown li {
+  margin: .3rem 0;
+}
+
+.sidebar-dropdown a {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+
+.sidebar-dropdown a:hover {
+  color: var(--brand);
+}
+/* Header (dark) */
+header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;  /* logo left, nav right */
+  padding: .75rem 1rem;
+}
+
+header .logo a {
+  font-weight: normal;   /* remove bold */
+  font-size: 1.1rem;
+  color: var(--header-text);   /* white logo text */
+  text-decoration: none;
+}
+
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+header nav a {
+  color: var(--header-text);   /* white nav text */
+  text-decoration: none;
+}
+
+header nav a:hover {
+  color: var(--brand);   /* blue hover */
+}
 
 
 
