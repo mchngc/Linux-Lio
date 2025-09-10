@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Linux-IO Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="basic-fcoe.html">Linux SCSI Target IO</a>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="documentation.html">Documentation</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <h2>Docs Menu</h2>
+      <ul>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="basic-dropdown">Basic Setup</a>
+          <ul class="sidebar-dropdown" id="basic-dropdown">
+            <li><a href="basic-iscsi.html">iSCSI</a></li>
+            <li><a href="basic-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="tuning-dropdown">Tuning</a>
+          <ul class="sidebar-dropdown" id="tuning-dropdown">
+            <li><a href="tuning-iscsi.html">iSCSI</a></li>
+            <li><a href="tuning-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+<section class="content">
+  <h1>Fiber Channel over Ethernet</h1>
+    <h2>Overview</h2>
+    <p>Fibre Channel over Ethernet (FCoE) provides FCoE SAN connectivity over Ethernet networks.
+</p>
+<p>The FCoE fabric module provides Fibre Channel (FC) access over Ethernet. It is based on a fabric module from open-fcoe.org. The Open-FCoE target code was adapted to use a modified upstream Linux libfc module. This includes a patch series to re-enable point-to-point module for libfc (merged upstream), and a set of hooks into libfc to be able to hand off incoming FLOGI requests to Fibre Channel based LinuxIO modules.
+
+</p>
+<h2>targetcli</h2>
+<p>targetcli from Datera, Inc. is used to configure FCoE targets. targetcli aggregates service modules via a core library, and exports them through an API to the LIO, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
+
+</p>
+<div class="info-box">
+  <span class="info-icon"></span>
+  <div class="info-text">
+    <strong>LIO Admin Manual</strong><br>
+    The LIO Admin Manual provides comprehensive background and many examples on using targetcli and on programming the Datera library.
+
+
+  </div>
+</div>
+<h3>Cheat Sheet</h3>
+<table>
+  <tr>
+    <th>Command</th>
+    <th>Commemnt</th>
+  </tr>
+  <tr>
+    <td>/backstores/iblock create my_disk /dev/sdb	</td>
+    <td>Create the LUN my_disk on the device /dev/sdb</td>
+  </tr>
+  <tr>
+    <td>/tcm_fc create &lt;WWPN&gt;	</td>
+    <td>Create an FCoE target</td>
+  </tr>
+  <tr>
+    <td>In /tcm_fc/&lt;WWPN&gt;:
+luns/ create /backstores/iblock/my_disk</td>
+    <td>Export the LUN my_disk</td>
+  </tr>
+  <tr>
+    <td>In /tcm_fc/&lt;WWPN&gt;:
+acls/ create &lt;Initiator WWPN&gt;</td>
+<td>Allow access for the initiator at &lt;WWPN&gt;
+</td>
+  </tr>
+  <tr>
+    <td>/saveconfig	</td>
+<td>Commit the configuration</td>
+
+</table>
+<h3>Startup</h3>
+<p>targetcli is invoked by running targetcli as root from the command prompt of the underlying LIO shell.
+
+</p>
+<pre><code># targetcli
+Welcome to targetcli:
+
+ Copyright (c) 2014 by Datera, Inc.
+ All rights reserved.
+
+Visit us at http://www.datera.io.
+
+Using ib_srpt fabric module.
+Using qla2xxx fabric module.
+Using iscsi fabric module.
+Using loopback fabric module.
+Using tcm_fc fabric module.
+
+/> tcm_fc/ info 
+Fabric module name: tcm_fc
+ConfigFS path: /sys/kernel/config/target/fc
+Allowed WWN list type: free
+sysFabric module specfile: /var/target/fabric/tcm_fc.spec
+Fabric module features: acls
+Corresponding kernel module: tcm_fc
+/></code></pre>
+<p>Upon targetcli initialization, the underlying RTSlib loads the installed fabric modules, and creates the corresponding ConfigFS mount points (at /sys/kernel/config/target/<fabric>), as specified by the associated spec files (located in /var/target/fabric/fabric.spec).
+
+</p>
+<h3>Display the object tree
+</h3>
+<p>Use ls to list the object hierarchy, which is initially empty:
+
+</p>
+<pre><code>/> ls
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [0 Storage Object]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [0 Target]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]
+/>
+</code></pre>
+<div class="info-box">
+  <span class="info-icon"></span>
+  <div class="info-text">
+    <strong>Global parameter auto_cd_after_create</strong><br>
+    After the creation of a new object, automatically enter its object context.
+
+
+
+  </div>
+</div>
+
+<p>Per default, auto_cd_after_create is set to true, which automatically enters an object context (or working directory) after its creation. The examples here are modeled after this behavior.
+
+</p>
+<p>Optionally, set auto_cd_after_create=false to prevent targetcli from automatically entering new object contexts after their creation:
+
+</p>
+<pre><code>/> set global auto_cd_after_create=false
+Parameter auto_cd_after_create is now 'false'.
+/></code></pre>
+<h3>Create a backstore
+</h3>
+<p>Create a backstore using the IBLOCK or FILEIO type devices.
+
+</p>
+<p>For instance, enter the top-level backstore context and create an IBLOCK backstore from a /dev/sdb block device:
+
+</p>
+<pre><code>/> cd backstores/
+/backstores> iblock/ create name=my_disk dev=/dev/sdb
+Generating a wwn serial.
+Created iblock storage object my_disk using /dev/sdb.
+Entering new node /backstores/iblock/my_disk.
+/backstores/iblock/my_disk></code></pre>
+<p>targetcli automatically creates a WWN serial ID for the backstore device and then changes the working context to it.
+
+</p>
+<p>The resulting object hierarchy looks as follows (displayed from the root object):
+
+</p>
+<pre><code>/> ls
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [1 Storage Object]
+  | | o- my_disk .......................................... [/dev/sdb activated]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [0 Target]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]
+/></code></pre>
+
+<p>Alternatively, any LVM logical volume can be used as a backstore, please refer to the LIO Admin Manual on how to create them properly.
+
+</p>
+<p>For instance, create an IBLOCK backstore on a logical volume (under /dev/&lt;volume_group_name&gt;/&lt;logical_volume_name&gt;):</p>
+<pre><code>/backstores> iblock/ create name=my_disk dev=/dev/vg0/lv1
+Generating a wwn serial.
+Created iblock storage object my_disk using /dev/vg0/lv1.
+Entering new node /backstores/iblock/my_disk.
+/backstores/iblock/my_disk></code></pre>
+
+<p>Again, targetcli automatically creates a WWN serial ID for the backstore device and then changes the working context to it.
+
+</p>
+<div class="info-box">
+  <span class="info-icon"></span>
+  <div class="info-text">
+    <strong>More backstore examples</strong><br>
+    More examples on creating backstores can be found in targetcli.
+  </div>
+</div>
+
+<h3>Instantiate a target
+</h3>
+<p>Associate the three Ethernet network interfaces that are available on the storage array with FCoE via:
+
+</p>
+<pre><code>echo ethX > /sys/module/fcoe/parameters/create
+</code></pre>
+<p>The three then resulting FCoE ports are presented in the WWN context with the following WWNPs:
+
+</p>
+<ul>
+  <li>20:00:00:0c:fc:00:f5:7b
+</li>
+<li>20:00:00:0c:fc:01:0c:0f
+</li>
+<li>20:00:00:15:17:af:5b:30
+</li>
+</ul>
+<p>Instantiate an FCoE target on the existing IBLOCK backstore device my_disk (as set up in targetcli):
+
+</p>
+<pre><code>/backstores/iblock/my_disk> /tcm_fc create 20:00:00:0c:fc:00:f5:7b
+Created target 20:00:00:0c:fc:00:f5:7b.
+Entering new node /tcm_fc/20:00:00:0c:fc:00:f5:7b.
+/tcm_fc/21:0...0c:fc:00:f5:7b></code></pre>
+<p>targetcli automatically changes the working context to the resulting Endpoint.
+
+</p>
+<h3>Export LUNs
+</h3>
+<p>Declare a LUN for the backstore device, to form a valid SAN storage object:
+
+</p>
+<pre><code>/tcm_fc/21:0...0c:fc:00:f5:7b> luns/ create /backstores/iblock/my_disk
+Selected LUN 0.
+Successfully created LUN 0.
+Entering new node /tcm_fc/20:00:00:0c:fc:00:f5:7b/luns/lun0.
+/tcm_fc/21:0...5:7b/luns/lun0></code></pre>
+<p>targetcli automatically assigns the default ID '0' to the LUN, and then changes the working context to the SAN storage object. The LIO is now created, and exports /dev/sdb as LUN 0.
+
+</p>
+<p>Return to the underlying Endpoint as the working context, as no attributes need to be set or modified for standard LUNs:
+
+</p>
+<pre><code>/tcm_fc/21:0...5:7b/luns/lun0> cd <
+Taking you back to /tcm_fc/20:00:00:0c:fc:00:f5:7b.
+/tcm_fc/21:0...0c:fc:00:f5:7b>
+</code></pre>
+
+<h3>Define access rights</h3>
+<p>Configure the access rights to allow logins from initiators. This requires setting up individual access rights for each initiators, based on its WWPN.
+
+</p>
+<p>Determine the WWPN for the respective FCoE initiator. For instance, for Linux initiator systems, use:
+
+</p>
+<pre><code># cat /sys/class/fc_host/host*/port_name | sed -e s/0x// -e 's/../&:/g' -e s/:$//
+</code></pre>
+<p>For a simple setup, allow access to the initiator with the WWPN as determined above:
+
+</p>
+<pre><code>/tcm_fc/21:0...0c:fc:00:f5:7b> acls/ create 21:00:00:24:ff:31:4c:4c
+Successfully created Node ACL for 21:00:00:24:ff:31:4c:4c.
+Created mapped LUN 0.
+Entering new node /tcm_fc/20:00:00:0c:fc:00:f5:7b/acls/21:00:00:24:ff:31:4c:4c.
+/tcm_fc/21:0...24:ff:31:4c:4c> cd /
+/></code></pre>
+<p>targetcli then automatically adds the appropriate mapped LUNs per default.
+
+</p>
+<h3>Display the object tree
+</h3>
+<p>The resulting FCoE SAN object hierarchy looks as follows (displayed from the root object):
+
+</p>
+<pre><code>/> ls
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [1 Storage Object]
+  | | o- my_disk .......................................... [/dev/sdb activated]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [0 Target]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]
+  o- tcm_fc ......................................................... [1 Target]
+    o- 20:00:00:0c:fc:00:f5:7b ....................................... [enabled]
+      o- acls .......................................................... [1 ACL]
+      | o- 21:00:00:24:ff:31:4c:4c .............................. [1 Mapped LUN]
+      |   o- mapped_lun0 ........................................... [lun0 (rw)]
+      o- luns .......................................................... [1 LUN]
+        o- lun0 .................................... [iblock/my_disk (/dev/sdb)]
+/></code></pre>
+<h3>Persist the configuration</h3>
+<div class="warning-box">
+  <span class="warning-icon"></span>
+  <div class="warning-text">
+    <strong>Don't forget to use saveconfig!s</strong><br>
+    Without saveconfig, the LIO configuration will be lost upon rebooting or unloading the target service, as the target configuration will revert back to the last saved one.
+
+  </div>
+</div>
+<p>Use saveconfig from the root context to persist the target configuration across LIO reboots:
+
+</p>
+<pre><code>/> saveconfig
+WARNING: Saving rtsnode1 current configuration to disk will overwrite your boot settings.
+The current target configuration will become the default boot config.
+Are you sure? Type 'yes': yes
+Making backup of srpt/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/srpt_start.sh
+Making backup of qla2xxx/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/qla2xxx_start.sh
+Making backup of loopback/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/loopback_start.sh
+Making backup of LIO-Target/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/lio_backup-2012-02-27_23:19:37.660264.sh
+Making backup of Target_Core_Mod/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/tcm_backup-2012-02-27_23:19:37.660264.sh
+Generated Target_Core_Mod config: /etc/target/backup/tcm_backup-2012-02-27_23:19:37.660264.sh
+Successfully updated default config /etc/target/lio_start.sh
+Successfully updated default config /etc/target/tcm_start.sh
+/>
+</code></pre>
+<h3>Spec file</h3>
+<p>Datera spec files define the fabric-dependent feature set, capabilities and available target ports of the specific underlying fabric.
+
+</p>
+<p>In particular, the FCoE spec file /var/target/fabric/tcm_fc.spec is included via RTSlib. WWN are extracted via /sys/class/fc_host/host*/port_name in wwn_from_files_filter, once the Ethernet device has been created with fcoe.ko, and are presented in the targetcli WWN working context to register individual FCoE port GUIDs.
+
+</p>
+<pre><code># WARNING: This is a draft specfile supplied for demo purposes only.
+
+# The tcm_fc fabric module uses the default feature set.
+features = acls
+
+# Non-standard module naming scheme
+kernel_module = tcm_fc
+
+# The module uses hardware addresses from there
+wwn_from_files = /sys/class/fc_host/host*/port_name
+
+# Transform '0x1234567812345678' WWN notation to '12:34:56:78:12:34:56:78'
+wwn_from_files_filter = "sed -e s/0x// -e 's/../&:/g' -e s/:$//"
+
+# The configfs group is default
+configfs_group = fc</code></pre>
+<h2>Specifications</h2>
+<p>The full advanced LIO SPC-3/SPC-4 SCSI logic (such as PRs, ALUA, VAAI, etc.) is inherently working on FCoE Ports and (across) all other fabric modules, such as FCoE, Fibre Channel, iSCSI, iSER, vHost, etc.
+
+</p>
+<p>The following specifications are available from the T11 Working Group:
+
+</p>
+<ul>
+  <li>Fibre Channel - Backbone (FC-BB): to develop the mappings necessary to bridge between physically-separate instances of the same network definition, including MAC address mapping & translation, configuration discovery, management facilities and mappings of FC Service definitions. Candidate network definitions are all flavors of Ethernet (incl. Gigabit) & FDDI, but will be a function of resources provided. Murali Rajagopal (edt.), Status: Published, 8/1/1996
+</li>
+</ul>
+</section>
+
+  </main>
+
+  <script>
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-target');
+        const dropdown = document.getElementById(targetId);
+        dropdown.classList.toggle('open');
+      });
+    });
+  </script>
+  
+ 
+</body>
+</html>
