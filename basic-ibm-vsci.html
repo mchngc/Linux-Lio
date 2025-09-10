@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Linux-IO Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="basic-ibm-vscsi.html">Linux SCSI Target IO</a>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="documentation.html">Documentation</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <h2>Docs Menu</h2>
+      <ul>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="basic-dropdown">Basic Setup</a>
+          <ul class="sidebar-dropdown" id="basic-dropdown">
+            <li><a href="basic-iscsi.html">iSCSI</a></li>
+            <li><a href="basic-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="tuning-dropdown">Tuning</a>
+          <ul class="sidebar-dropdown" id="tuning-dropdown">
+            <li><a href="tuning-iscsi.html">iSCSI</a></li>
+            <li><a href="tuning-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+<section class="content">
+    <h2>Overview</h2>
+    <p>The IBM vSCSI fabric module provides virtualized LinuxIO devices on the IBM System p.
+
+    </p>
+    <p>IBM vSCSI is based on a fabric module from Tomonori Fujita from NTT Labs. The fabric module (ibmvscsis.ko) for LIO currently remains out-of-tree.
+
+</p>
+
+<h2>Modules</h2>
+<p>ismod output:</p>
+<pre><code>Module                  Size  Used by
+ibmvscsis              22024  4 
+libsrp                  9242  1 ibmvscsis
+scsi_tgt               15597  1 libsrp
+target_core_file       10766  1 
+target_core_mod       266898  10 ibmvscsis,target_core_file
+configfs               33950  2 target_core_mod</code></pre>
+<h2>targetcli</h2>
+<p>targetcli from Datera, Inc. is used to configure vHost targets. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
+
+</p>
+<div class="info-box">
+  <span class="info-icon"></span>
+  <div class="info-text">
+    <strong>LIO Admin Manual</strong><br>
+    The LIO Admin Manual provides comprehensive background and many examples on using targetcli and on programming the target library.
+
+  </div>
+</div>
+
+</section>
+
+  </main>
+
+  <script>
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-target');
+        const dropdown = document.getElementById(targetId);
+        dropdown.classList.toggle('open');
+      });
+    });
+  </script>
+  <footer>
+    <p>This page is based on
+      <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+      .Thanks to Nicholas Bellinger for creating LIO and the original <a href="linux-iscsi.org" target="_blank">
+        linux-iscsi.org
+      </a>
+    </p>
+  </footer>
+ 
+</body>
+</html>
