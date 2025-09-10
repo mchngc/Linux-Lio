@@ -16,13 +16,14 @@
   <nav>
     <ul>
       <li><a href="#overview">Overview</a></li>
-      <li>
-        <a href="#">Code ▾</a>
-        <ul class="dropdown">
-          <li><a href="basic-iscsi.html">iSCSI</a></li>
-          <li><a href="basic-vhost.html">vhost-scsi</a></li>
-        </ul>
-      </li>
+      <li class="dropdown-parent">
+  <a href="#" id="code-toggle">Code ▾</a>
+  <ul class="dropdown">
+    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+  </ul>
+</li>
+
       <li><a href="docs.html">Documentation</a></li>
     </ul>
   </nav>
@@ -48,14 +49,11 @@
       <h2>On this page</h2>
       <ul>
         <li><a href="#overview">Overview</a></li>
+        <li><a href="#architecture">Architecture</a></li>
         <li>
           <a href="#frontend">Frontend (Fabric Modules)</a>
-          <ul>
-            <li><a href="#frontend-matrix">Support matrix</a></li>
-          </ul>
         </li>
         <li><a href="#backend">Backend (Backstores)</a></li>
-        <li><a href="#architecture">Architecture</a></li>
         <li><a href="#features">Advanced SCSI features</a></li>
         <li><a href="#targetcli">targetcli</a></li>
         <li><a href="#compatibility">Compatibility & certifications</a></li>
@@ -79,6 +77,19 @@
           option for cloud deployments.
         </p>
       </section>
+      
+      <section id="architecture" class="section">
+        <h2>Architecture</h2>
+        <p>The LinuxIO engine implements the generic SCSI semantics.</p>
+         <img src="images/330px-LIO-Architecture (1).png" alt="LinuxIO Target Architecture diagram">
+        <ul class="checklist">
+          <li>High-performance, non-blocking, multithreaded architecture with SSE4.2 support</li>
+          <li>CPU architectures: x86, ia64, Alpha, Cell, PPC, ARM, MIPS, etc.</li>
+          <li>Distributions: CentOS, Debian, Fedora, openSUSE, RHEL, Scientific Linux, SLES, Ubuntu</li>
+          <li>Platforms: PC architecture, Sony PS2/PS3, Raspberry Pi, Technologic TS-7800</li>
+        </ul>
+      </section>
+
 
       <section id="frontend" class="section">
         <h2>Frontend — Fabric Modules</h2>
@@ -88,16 +99,16 @@
         </p>
 
         <div class="card-grid">
-          <div class="card"><h3>Fibre Channel</h3><p>QLogic: released, Emulex: released</p></div>
-          <div class="card"><h3>FCoE</h3><p>Released</p></div>
-          <div class="card"><h3>iEEE 1394</h3><p>Released</p></div>
-          <div class="card"><h3>IBM vSCSI (System p)</h3><p>RC</p></div>
-          <div class="card"><h3>iSCSI</h3><p>Software: released, Chelsio: released</p></div>
-          <div class="card"><h3>iSER (InfiniBand)</h3><p>Mellanox: released</p></div>
-          <div class="card"><h3>Loopback</h3><p>SCSI virtualization: released</p></div>
-          <div class="card"><h3>SRP (InfiniBand)</h3><p>Mellanox: released</p></div>
-          <div class="card"><h3>USB Gadget</h3><p>Released</p></div>
-          <div class="card"><h3>vHost</h3><p>virtio / virtio-scsi PV guests: released</p></div>
+          <div class="card"><h3><a href="basic-fibre.html">Fibre Channel</a></h3><p>QLogic, Emulex</p></div>
+          <div class="card"><h3><a href="basic-fcoe.html">FCoE</a></h3></div>
+          <div class="card"><h3>iEEE 1394</h3><p>TODO</p></div>
+          <div class="card"><h3><a href="basic-ibm-vscsi.html">IBM vSCSI (System P)</a></h3></div>
+          <div class="card"><h3><a href="basic-iscsi.html">iSCSI</a></h3><p>Software, Chelsio </p></div>
+          <div class="card"><h3><a href="basic-iser.html">iSER (InfiniBand)</a></h3></div>
+          <div class="card"><h3><a href="basic-loopback.html">Loopback</a></h3><p>SCSI virtualization </p></div>
+          <div class="card"><h3><a href="basic-srp.html">SRP (InfiniBand)</a></h3></h3></div>
+          <div class="card"><h3>USB Gadget</h3><p>TODO</p></div>
+          <div class="card"><h3><a href="basic-vhost.html">vHost</a></h3><p>virtio / virtio-scsi PV guests </p></div>
         </div>
 
         <div id="frontend-matrix" class="info-box" role="note">
@@ -116,18 +127,6 @@
         <ul class="checklist">
           <li>Backstores: SATA, SAS, SCSI, SSD, FLASH, DVD, USB, NVMe, ramdisk, etc.</li>
           <li>Virtualization of storage media; transparent mapping of I/O to LUNs</li>
-        </ul>
-      </section>
-
-      <section id="architecture" class="section">
-        <h2>Architecture</h2>
-        <p>The LinuxIO engine implements the generic SCSI semantics.</p>
-         <img src="images/330px-LIO-Architecture (1).png" alt="LinuxIO Target Architecture diagram">
-        <ul class="checklist">
-          <li>High-performance, non-blocking, multithreaded architecture with SSE4.2 support</li>
-          <li>CPU architectures: x86, ia64, Alpha, Cell, PPC, ARM, MIPS, etc.</li>
-          <li>Distributions: CentOS, Debian, Fedora, openSUSE, RHEL, Scientific Linux, SLES, Ubuntu</li>
-          <li>Platforms: PC architecture, Sony PS2/PS3, Raspberry Pi, Technologic TS-7800</li>
         </ul>
       </section>
 
