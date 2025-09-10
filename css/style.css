@@ -279,11 +279,12 @@ tr:nth-child(even) {
   display: flex;
   align-items: flex-start;
   background-color: #e6f4ff;
-  border-left: 6px solid #2196f3;
+  border-left: 10px solid #2196f3;
   padding: 12px;
   margin: 20px 0;
   border-radius: 4px;
   font-family: sans-serif;
+  color:#000;
 }
 
 .info-icon {
@@ -496,16 +497,29 @@ main {
 }
 
 /* Info/notice boxes */
-.info-box, .notice-box {
+.info-box {
   display: flex;
-  gap: .6rem;
-  padding: .9rem 1rem;
-  border-radius: 6px;
-  margin: 1rem 0;
-  border: 1px solid var(--border);
+  align-items: flex-start;
+  background-color: #e6f4ff;
+  border-left: 10px solid #2196f3;
+  padding: 12px;
+  margin: 20px 0;
+  border-radius: 4px;
+  font-family: sans-serif;
+  color: #000;
 }
 .info-box { background: #f9fcff; }
-.notice-box { background: #f9fff9; }
+.notice-box {
+  display: flex;
+  align-items: flex-start;
+  background-color: #fff8f0;
+  border-left: 10px solid #ff9800;
+  padding: 12px;
+  margin: 20px 0;
+  border-radius: 4px;
+  font-family: sans-serif;
+  color: #000;
+}
 .info-icon, .notice-icon { font-size: 1.2rem; }
 .info-text, .notice-text { color: var(--text); }
 
@@ -583,6 +597,9 @@ header nav a {
 
 header nav a:hover {
   color: var(--brand);   /* blue hover */
+}
+.nowrap {
+  white-space: nowrap;
 }
 
 
