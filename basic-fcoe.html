@@ -12,10 +12,19 @@
       <a href="basic-fcoe.html">Linux SCSI Target IO</a>
     </div>
     <nav>
-      <ul>
-        <li><a href="documentation.html">Documentation</a></li>
-      </ul>
-    </nav>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+        <li class="dropdown-parent">
+        <a href="#" id="code-toggle">Code ▾</a>
+    <ul class="dropdown">
+    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+    </ul>
+</li>
+
+      <li><a href="docs.html">Documentation</a></li>
+    </ul>
+  </nav>
   </header>
 
   <main>
@@ -27,6 +36,12 @@
           <ul class="sidebar-dropdown" id="basic-dropdown">
             <li><a href="basic-iscsi.html">iSCSI</a></li>
             <li><a href="basic-vhost.html">vhost-scsi</a></li>
+            <li><a href="basic-fcoe.html">FCoE</a></li>
+            <li><a href="basic-fibre.html">Fibre Channel</a></li>
+            <li><a href="basic-ibm-vscsi.html">IBM vSCSi (System P)</a></li>
+            <li><a href="basic-iser.html">ISER (InfiniBand)</a></li>
+            <li><a href="basic-loopback.html">Loopback</a></li>
+            <li><a href="basic-srp.html">SRP (Infiniband)</a></li>
           </ul>
         </li>
         <li>
@@ -309,60 +324,6 @@ o- / ..................................................................... [...]
       o- luns .......................................................... [1 LUN]
         o- lun0 .................................... [iblock/my_disk (/dev/sdb)]
 /></code></pre>
-<h3>Persist the configuration</h3>
-<div class="warning-box">
-  <span class="warning-icon"></span>
-  <div class="warning-text">
-    <strong>Don't forget to use saveconfig!s</strong><br>
-    Without saveconfig, the LIO configuration will be lost upon rebooting or unloading the target service, as the target configuration will revert back to the last saved one.
-
-  </div>
-</div>
-<p>Use saveconfig from the root context to persist the target configuration across LIO reboots:
-
-</p>
-<pre><code>/> saveconfig
-WARNING: Saving rtsnode1 current configuration to disk will overwrite your boot settings.
-The current target configuration will become the default boot config.
-Are you sure? Type 'yes': yes
-Making backup of srpt/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
-Successfully updated default config /etc/target/srpt_start.sh
-Making backup of qla2xxx/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
-Successfully updated default config /etc/target/qla2xxx_start.sh
-Making backup of loopback/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
-Successfully updated default config /etc/target/loopback_start.sh
-Making backup of LIO-Target/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
-Successfully updated default config /etc/target/lio_backup-2012-02-27_23:19:37.660264.sh
-Making backup of Target_Core_Mod/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
-Successfully updated default config /etc/target/tcm_backup-2012-02-27_23:19:37.660264.sh
-Generated Target_Core_Mod config: /etc/target/backup/tcm_backup-2012-02-27_23:19:37.660264.sh
-Successfully updated default config /etc/target/lio_start.sh
-Successfully updated default config /etc/target/tcm_start.sh
-/>
-</code></pre>
-<h3>Spec file</h3>
-<p>Datera spec files define the fabric-dependent feature set, capabilities and available target ports of the specific underlying fabric.
-
-</p>
-<p>In particular, the FCoE spec file /var/target/fabric/tcm_fc.spec is included via RTSlib. WWN are extracted via /sys/class/fc_host/host*/port_name in wwn_from_files_filter, once the Ethernet device has been created with fcoe.ko, and are presented in the targetcli WWN working context to register individual FCoE port GUIDs.
-
-</p>
-<pre><code># WARNING: This is a draft specfile supplied for demo purposes only.
-
-# The tcm_fc fabric module uses the default feature set.
-features = acls
-
-# Non-standard module naming scheme
-kernel_module = tcm_fc
-
-# The module uses hardware addresses from there
-wwn_from_files = /sys/class/fc_host/host*/port_name
-
-# Transform '0x1234567812345678' WWN notation to '12:34:56:78:12:34:56:78'
-wwn_from_files_filter = "sed -e s/0x// -e 's/../&:/g' -e s/:$//"
-
-# The configfs group is default
-configfs_group = fc</code></pre>
 <h2>Specifications</h2>
 <p>The full advanced LIO SPC-3/SPC-4 SCSI logic (such as PRs, ALUA, VAAI, etc.) is inherently working on FCoE Ports and (across) all other fabric modules, such as FCoE, Fibre Channel, iSCSI, iSER, vHost, etc.
 
@@ -387,6 +348,16 @@ configfs_group = fc</code></pre>
         dropdown.classList.toggle('open');
       });
     });
+    const toggle = document.getElementById('code-toggle');
+  const dropdown = document.querySelector('header nav .dropdown');
+  document.addEventListener('click', (e) => {
+    if (toggle && toggle.contains(e.target)) {
+      e.preventDefault();
+      dropdown.classList.toggle('open');
+    } else if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
   </script>
   
  
