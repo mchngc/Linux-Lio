@@ -12,10 +12,19 @@
       <a href="basic-ibm-vscsi.html">Linux SCSI Target IO</a>
     </div>
     <nav>
-      <ul>
-        <li><a href="documentation.html">Documentation</a></li>
-      </ul>
-    </nav>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+        <li class="dropdown-parent">
+        <a href="#" id="code-toggle">Code ▾</a>
+    <ul class="dropdown">
+    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+    </ul>
+</li>
+
+      <li><a href="docs.html">Documentation</a></li>
+    </ul>
+  </nav>
   </header>
 
   <main>
@@ -27,6 +36,12 @@
           <ul class="sidebar-dropdown" id="basic-dropdown">
             <li><a href="basic-iscsi.html">iSCSI</a></li>
             <li><a href="basic-vhost.html">vhost-scsi</a></li>
+            <li><a href="basic-fcoe.html">FCoE</a></li>
+            <li><a href="basic-fibre.html">Fibre Channel</a></li>
+            <li><a href="basic-ibm-vscsi.html">IBM vSCSi (System P)</a></li>
+            <li><a href="basic-iser.html">ISER (InfiniBand)</a></li>
+            <li><a href="basic-loopback.html">Loopback</a></li>
+            <li><a href="basic-srp.html">SRP (Infiniband)</a></li>
           </ul>
         </li>
         <li>
@@ -83,6 +98,16 @@ configfs               33950  2 target_core_mod</code></pre>
         dropdown.classList.toggle('open');
       });
     });
+    const toggle = document.getElementById('code-toggle');
+  const dropdown = document.querySelector('header nav .dropdown');
+  document.addEventListener('click', (e) => {
+    if (toggle && toggle.contains(e.target)) {
+      e.preventDefault();
+      dropdown.classList.toggle('open');
+    } else if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
   </script>
   <footer>
     <p>This page is based on
