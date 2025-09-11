@@ -12,10 +12,19 @@
       <a href="basic-srp.html">Linux SCSI Target IO</a>
     </div>
     <nav>
-      <ul>
-        <li><a href="documentation.html">Documentation</a></li>
-      </ul>
-    </nav>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+        <li class="dropdown-parent">
+        <a href="#" id="code-toggle">Code ▾</a>
+    <ul class="dropdown">
+    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+    </ul>
+</li>
+
+      <li><a href="docs.html">Documentation</a></li>
+    </ul>
+  </nav>
   </header>
 
   <main>
@@ -27,6 +36,12 @@
           <ul class="sidebar-dropdown" id="basic-dropdown">
             <li><a href="basic-iscsi.html">iSCSI</a></li>
             <li><a href="basic-vhost.html">vhost-scsi</a></li>
+            <li><a href="basic-fcoe.html">FCoE</a></li>
+            <li><a href="basic-fibre.html">Fibre Channel</a></li>
+            <li><a href="basic-ibm-vscsi.html">IBM vSCSi (System P)</a></li>
+            <li><a href="basic-iser.html">ISER (InfiniBand)</a></li>
+            <li><a href="basic-loopback.html">Loopback</a></li>
+            <li><a href="basic-srp.html">SRP (Infiniband)</a></li>
           </ul>
         </li>
         <li>
@@ -331,60 +346,6 @@ Generated Target_Core_Mod config: /etc/target/backup/tcm_backup-2012-02-27_23:19
 Successfully updated default config /etc/target/lio_start.sh
 Successfully updated default config /etc/target/tcm_start.sh
 /></code></pre>
-<h3>Spec file</h3>
-<p>Datera spec files define the fabric-dependent feature set, capabilities and available target ports of the specific underlying fabric.
-
-</p>
-<p>In particular, the InfiniBand spec file /var/target/fabric/ib_srpt.spec is included via RTSlib. WWN values are extracted via /sys/class/infiniband/*/ports/*/gids/0 in wwn_from_files_filter below, and are presented in the targetcli WWN context to register individual InfiniBand port GUIDs.
-
-</p>
-<pre><code># WARNING: This is a draft specfile supplied for demo purposes only.
-
-# The ib_srpt fabric module uses the default feature set.
-features = acls
-
-# The module uses hardware addresses from there
-wwn_from_files = /sys/class/infiniband/*/ports/*/gids/0
-
-# Transform 'fe80:0000:0000:0000:0002:1903:000e:8acd' WWN notation to
-# '0x00000000000000000002c903000e8acd'
-wwn_from_files_filter = "sed -e s/fe80/0x0000/ -e 's/\://g'"
-
-# Non-standard module naming scheme
-kernel_module = ib_srpt
-
-# The configfs group is standard
-configfs_group = srpt
-Scripting with RTSlib
-Setup script
-The following Python code illustrates how to setup a basic SRP target and export a mapped LUN:
-
-#!/usr/bin/python
-# InfiniBand setup script example with RTSlib
-from rtslib import *
-
-# Setup an IBLOCK backstore
-backstore = IBlockBackstore(3, mode='create')
-try:
-    so = IBlockStorageObject(backstore, "fioa", "/dev/fioa", gen_wwn=True)
-except:
-    backstore.delete()
-    raise
-
-# Create an IB target endpoint using an ib_srpt WWPN
-fabric = FabricModule('ib_srpt')
-target = Target(fabric, '0x00000000000000000002c903000e8acd')
-tpg = TPG(target, 1)
-
-# Export LUN 0 via the 'so' StorageObject class
-lun0 = tpg.lun(0, so, "my_lun")
-
-# Setup the NodeACL for an IB initiator, and create MappedLUN 0
-node_acl = tpg.node_acl('0x00000000000000000002c903000e8acd')
-mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
-<p>Note that while SRP TPGs are masked by targetcli, they are not masked by RTSlib.
-
-</p>
 <h3>Object tree</h3>
 <p>The resulting object tree looks as follows:
 
@@ -429,6 +390,16 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
         dropdown.classList.toggle('open');
       });
     });
+    const toggle = document.getElementById('code-toggle');
+  const dropdown = document.querySelector('header nav .dropdown');
+  document.addEventListener('click', (e) => {
+    if (toggle && toggle.contains(e.target)) {
+      e.preventDefault();
+      dropdown.classList.toggle('open');
+    } else if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
   </script>
   <footer>
     <p>This page is based on
