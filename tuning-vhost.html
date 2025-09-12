@@ -60,31 +60,28 @@
   </main>
 
   <script>
-    // Dropdown
-    const toggle = document.getElementById('code-toggle');
-    const dropdown = document.querySelector('.dropdown');
-    document.addEventListener('click', (e) => {
-      if (toggle && toggle.contains(e.target)) {
-        e.preventDefault();
-        dropdown.classList.toggle('open');
-      } else if (dropdown && !dropdown.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
+  // Sidebar dropdowns
+  document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('data-target');
+      const dropdown = document.getElementById(targetId);
+      dropdown.classList.toggle('open');
     });
+  });
 
-    // Smooth-scroll
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        const id = a.getAttribute('href');
-        const el = document.querySelector(id);
-        if (el) {
-          e.preventDefault();
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          history.pushState(null, '', id);
-        }
-      });
-    });
-  </script>
+  // Header "Code ▾" dropdown
+  const toggle = document.getElementById('code-toggle');
+  const dropdown = document.querySelector('header nav .dropdown');
+  document.addEventListener('click', (e) => {
+    if (toggle && toggle.contains(e.target)) {
+      e.preventDefault();
+      dropdown.classList.toggle('open');
+    } else if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
+</script>
   <footer>
     <p>Based on the original work at
        <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
