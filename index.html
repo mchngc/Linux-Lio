@@ -21,6 +21,7 @@
   <ul class="dropdown">
     <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
     <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+    <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
   </ul>
 </li>
 
@@ -125,7 +126,7 @@
           Backstores implement the methods to access data on devices, providing storage media independence.
         </p>
         <ul class="checklist">
-          <li>Backstores: SATA, SAS, SCSI, SSD, FLASH, DVD, USB, NVMe, ramdisk, etc.</li>
+          <li>Backstores: SATA, SAS, SCSI, SSD, FLASH, DVD, USB, NVMe, ramdisk, SCSI passthrough, userspace SCSI devices via TCMU, userspace block devices via ublk, etc.</li>
           <li>Virtualization of storage media; transparent mapping of I/O to LUNs</li>
         </ul>
       </section>
@@ -191,13 +192,15 @@ o- / ...................................................................
     </article>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>
-        Based on the original work at <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>.
-        Thanks to Nicholas Bellinger for creating LIO.
-      </p>
-    </div>
+  <footer>
+    <p>Based on the original work at
+       <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
+      <a href="https://github.com/mchngc" target = "_blank">
+        Max Christie
+        </a>
+      .Thanks to Nicholas Bellinger for creating LIO.
+      </a>
+    </p>
   </footer>
 
   <script>
