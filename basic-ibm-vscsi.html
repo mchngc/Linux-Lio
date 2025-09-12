@@ -19,6 +19,8 @@
     <ul class="dropdown">
     <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
     <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+        <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+
     </ul>
 </li>
 
@@ -72,17 +74,9 @@ target_core_file       10766  1
 target_core_mod       266898  10 ibmvscsis,target_core_file
 configfs               33950  2 target_core_mod</code></pre>
 <h2>targetcli</h2>
-<p>targetcli from Datera, Inc. is used to configure vHost targets. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
+<p>targetcli is used to configure vHost targets. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
 
 </p>
-<div class="info-box">
-  <span class="info-icon"></span>
-  <div class="info-text">
-    <strong>LIO Admin Manual</strong><br>
-    The LIO Admin Manual provides comprehensive background and many examples on using targetcli and on programming the target library.
-
-  </div>
-</div>
 
 </section>
 
@@ -118,6 +112,15 @@ configfs               33950  2 target_core_mod</code></pre>
       </a>
     </p>
   </footer>
- 
+ <footer>
+    <p>Based on the original work at
+       <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
+      <a href="https://github.com/mchngc" target = "_blank">
+        Max Christie
+        </a>
+      .Thanks to Nicholas Bellinger for creating LIO.
+      </a>
+    </p>
+  </footer>
 </body>
 </html>
