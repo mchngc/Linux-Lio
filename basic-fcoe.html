@@ -19,6 +19,8 @@
     <ul class="dropdown">
     <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
     <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+        <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+
     </ul>
 </li>
 
@@ -61,18 +63,9 @@
 
 </p>
 <h2>targetcli</h2>
-<p>targetcli from Datera, Inc. is used to configure FCoE targets. targetcli aggregates service modules via a core library, and exports them through an API to the LIO, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
+<p>targetcli is used to configure FCoE targets. targetcli aggregates service modules via a core library, and exports them through an API to the LIO, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
 
 </p>
-<div class="info-box">
-  <span class="info-icon"></span>
-  <div class="info-text">
-    <strong>LIO Admin Manual</strong><br>
-    The LIO Admin Manual provides comprehensive background and many examples on using targetcli and on programming the Datera library.
-
-
-  </div>
-</div>
 <h3>Cheat Sheet</h3>
 <table>
   <tr>
@@ -206,7 +199,7 @@ o- / ..................................................................... [...]
   o- qla2xxx ........................................................ [0 Target]
 /></code></pre>
 
-<p>Alternatively, any LVM logical volume can be used as a backstore, please refer to the LIO Admin Manual on how to create them properly.
+
 
 </p>
 <p>For instance, create an IBLOCK backstore on a logical volume (under /dev/&lt;volume_group_name&gt;/&lt;logical_volume_name&gt;):</p>
@@ -358,7 +351,16 @@ o- / ..................................................................... [...]
     }
   });
   </script>
-  
+  <footer>
+    <p>Based on the original work at
+       <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
+      <a href="https://github.com/mchngc" target = "_blank">
+        Max Christie
+        </a>
+      .Thanks to Nicholas Bellinger for creating LIO.
+      </a>
+    </p>
+  </footer>
  
 </body>
 </html>
