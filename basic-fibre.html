@@ -19,6 +19,8 @@
     <ul class="dropdown">
     <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
     <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+        <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+
     </ul>
 </li>
 
@@ -111,7 +113,7 @@
 
 </p>
 <h2>targetcli</h2>
-<p>targetcli from Datera, Inc. is used to configure Fibre Channel targets. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
+<p>targetcli is used to configure Fibre Channel targets. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
 
 </p>
 
@@ -250,7 +252,6 @@ o- / ..................................................................... [...]
   o- qla2xxx ........................................................ [0 Target]
 /></code></pre>
 
-<p>Alternatively, any LVM logical volume can be used as a backstore, please refer to the LIO Admin Manual on how to create them properly.
 
 </p>
 <p>For instance, create an IBLOCK backstore on a logical volume (under /dev/<volume_group_name>/<logical_volume_name>):
@@ -461,12 +462,12 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
   });
   </script>
   <footer>
-    <p>This page is based on
-      <a href="linux-iscsi.org" target="_blank">
-        linux-iscsi.org
-      </a>
-      .Thanks to Nicholas Bellinger for creating LIO and the original <a href="linux-iscsi.org" target="_blank">
-        linux-iscsi.org
+    <p>Based on the original work at
+       <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
+      <a href="https://github.com/mchngc" target = "_blank">
+        Max Christie
+        </a>
+      .Thanks to Nicholas Bellinger for creating LIO.
       </a>
     </p>
   </footer>
