@@ -5,29 +5,47 @@
   <title>Linux-IO Documentation</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Highlight.js core -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      id="hljs-theme-light">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      id="hljs-theme-dark" disabled>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 </head>
 <body>
   <header>
-    <div class="logo">
-      <a href="index.html">Linux SCSI Target IO</a>
-    </div>
-   <nav>
-    <ul>
-      <li><a href="#overview">Overview</a></li>
+  <div class="logo">
+    <a href="index.html">Linux SCSI Target IO</a>
+  </div>
+
+  <div class="header-right">
+    <nav>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
         <li class="dropdown-parent">
-        <a href="#" id="code-toggle">Code ▾</a>
-    <ul class="dropdown">
-    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
-    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
-        <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+          <a href="#" id="code-toggle">Code ▾</a>
+          <ul class="dropdown">
+            <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+            <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+            <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+          </ul>
+        </li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+    </nav>
 
-    </ul>
-</li>
-
-      <li><a href="docs.html">Documentation</a></li>
-    </ul>
-  </nav>
-  </header>
+    <div class="menu">
+      <button id="menu-toggle" aria-label="Settings">☰</button>
+      <ul class="menu-dropdown" id="menu-dropdown">
+        <li><button id="theme-toggle">Toggle dark mode</button></li>
+       </ul>
+    </div>
+  </div>
+</header>
 
   <main>
     <aside class="sidebar">
@@ -111,7 +129,7 @@ Beware!</td>
 
 </table>
 <h2>Startup</h2>
-<pre><code># targetcli
+<pre><code class="language-bash"># targetcli
 Welcome to targetcli:
 
  Copyright (c) 2014 by Datera, Inc.
@@ -141,7 +159,7 @@ Corresponding kernel module: iscsi_target_mod
 <p>Use ls to list the object hierarchy, which is initially empty:
 
 </p>
-<pre><code>/> ls
+<pre><code class="language-bash">/> ls
 o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
@@ -157,7 +175,7 @@ o- / ..................................................................... [...]
 <div class="info-box">
   <span class="info-icon"></span>
   <div class="info-text">
-    <strong>Global parameter <code>auto_cd_after_create</code></strong><br>
+    <strong>Global parameter <code class="language-bash">auto_cd_after_create</code></strong><br>
     After the creation of a new object, automatically enter its object context.
   </div>
 </div>
@@ -167,7 +185,7 @@ o- / ..................................................................... [...]
 <p>Optionally, set auto_cd_after_create=false to prevent targetcli from automatically entering new object context after their their creation:
 
 </p>
-<pre><code>/> set global auto_cd_after_create=false
+<pre><code class="language-bash">/> set global auto_cd_after_create=false
 Parameter auto_cd_after_create is now 'false'.
 /></code></pre>
 
@@ -178,7 +196,7 @@ Parameter auto_cd_after_create is now 'false'.
 <p>For instance, enter the top-level backstore context and create an IBLOCK backstore from a /dev/sdb block device:
 
 </p>
-<pre><code>/> cd backstores/
+<pre><code class="language-bash">/> cd backstores/
 /backstores> iblock/ create name=my_disk dev=/dev/sdb
 Generating a wwn serial.
 Created iblock storage object my_disk using /dev/sdb.
@@ -190,7 +208,7 @@ Entering new node /backstores/iblock/my_disk.
 <p>The resulting object hierarchy looks as follows (displayed from the root object):
 
 </p>
-<pre><code>/> ls
+<pre><code class="language-bash">/> ls
 o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
@@ -208,7 +226,7 @@ o- / ..................................................................... [...]
 <p>For instance, create an IBLOCK backstore on a logical volume (under /dev/<volume_group_name>/<logical_volume_name>):
 
 </p>
-<pre><code>/backstores> iblock/ create name=my_disk dev=/dev/vg0/lv1
+<pre><code class="language-bash">/backstores> iblock/ create name=my_disk dev=/dev/vg0/lv1
 Generating a wwn serial.
 Created iblock storage object my_disk using /dev/vg0/lv1.
 Entering new node /backstores/iblock/my_disk.
@@ -227,7 +245,7 @@ More examples on creating backstores can be found in targetcli.
 <p>Instantiate an iSCSI target on the existing backstore my_disk:
 
 </p>
-<pre><code>/backstores/iblock/my_disk> /iscsi create
+<pre><code class="language-bash">/backstores/iblock/my_disk> /iscsi create
 Created target iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11.
 Selected TPG Tag 1.
 Successfully created TPG 1.
@@ -241,7 +259,7 @@ Entering new node /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11
 <p>Add LUNs to the iSCSI target:
 
 </p>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> luns/ create /backstores/iblock/my_disk
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> luns/ create /backstores/iblock/my_disk
 Selected LUN 0.
 Successfully created LUN 0.
 Entering new node /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11/tpgt1/luns/lun0.
@@ -254,7 +272,7 @@ Entering new node /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11
 <p>Return to the underlying TPG as the working context, as no attributes need to be set or modified for standard LUNs:
 
 </p>
-<pre><code>/iscsi/iqn.20...gt1/luns/lun0> cd <
+<pre><code class="language-bash">/iscsi/iqn.20...gt1/luns/lun0> cd <
 Taking you back to /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11/tpgt1.
 /iscsi/iqn.20...a0e4a11/tpgt1>
 </code></pre>
@@ -263,7 +281,7 @@ Taking you back to /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a1
 <p>Assign an active IP address (here the IPv4 address 192.168.1.139) to the iSCSI TPG to form a valid iSCSI Endpoint:
 
 </p>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> portals/ create 192.168.1.139
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> portals/ create 192.168.1.139
 Using default IP port 3260
 Successfully created network portal 192.168.1.139:3260.
 Entering new node /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11/tpgt1/portals/192.168.1.139:3260.
@@ -286,10 +304,10 @@ Taking you back to /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a1
 <p>For simple demo setups, "open" access can be granted to all initiators so that they can access all LUNs in the TPG without further authentication. To enable that so-called "demo mode" TPG operation, disable all authentication for the corresponding Endpoint:
 
 </p>
-<pre><code>For simple demo setups, "open" access can be granted to all initiators so that they can access all LUNs in the TPG without further authentication. To enable that so-called "demo mode" TPG operation, disable all authentication for the corresponding Endpoint:
+<pre><code class="language-bash">For simple demo setups, "open" access can be granted to all initiators so that they can access all LUNs in the TPG without further authentication. To enable that so-called "demo mode" TPG operation, disable all authentication for the corresponding Endpoint:
 
 </code></pre>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> set attribute authentication=0 demo_mode_write_protect=0
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> set attribute authentication=0 demo_mode_write_protect=0
 generate_node_acls=1 cache_dynamic_acls=1.
 Parameter demo_mode_write_protect is now '0'.
 Parameter authentication is now '0'.
@@ -322,7 +340,7 @@ Parameter cache_dynamic_acls is now '1'.
 <p>Enable secure sessions for the initiator with the IQN "iqn.1991-05.com.microsoft:ibm-t410s":
 
 </p>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> acls/ create iqn.1991-05.com.microsoft:ibm-t410s
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> acls/ create iqn.1991-05.com.microsoft:ibm-t410s
 Successfully created Node ACL for iqn.1991-05.com.microsoft:ibm-t410s
 Created mapped LUN 0.
 Entering new node /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11/tpgt1/acls/iqn.1991-05.com.microsoft:ibm-t410s/mapped_lun0.
@@ -341,7 +359,7 @@ Taking you back to /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a1
 
 </p>
 
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> cd acls/iqn.1991-05.com.microsoft:ibm-t410s
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> cd acls/iqn.1991-05.com.microsoft:ibm-t410s
 /iscsi/iqn.20...oft:ibm-t410s> set auth userid=iqn.1991-05.com.microsoft:ibm-t410s
 Parameter userid is now 'iqn.1991-05.com.microsoft:ibm-t410s'.
 /iscsi/iqn.20...oft:ibm-t410s> set auth password=mytargetsecret
@@ -376,7 +394,7 @@ AUTH CONFIG GROUP
 <p>Enable secure sessions for the initiator with the IQN "iqn.1991-05.com.microsoft:ibm-t410s":
 
 </p>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> acls/ create iqn.1991-05.com.microsoft:ibm-t410s
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> acls/ create iqn.1991-05.com.microsoft:ibm-t410s
 Successfully created Node ACL for iqn.1991-05.com.microsoft:ibm-t410s
 Created mapped LUN 0.
 Entering new node /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11/tpgt1/acls/iqn.1991-05.com.microsoft:ibm-t410s/mapped_lun0.
@@ -398,7 +416,7 @@ Taking you back to /iscsi/iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a1
     <li>The userid (login name) and password (target secret) for the target.
 </li>
 </ul>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> cd acls/iqn.1991-05.com.microsoft:ibm-t410s
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> cd acls/iqn.1991-05.com.microsoft:ibm-t410s
 /iscsi/iqn.20...oft:ibm-t410s> set auth userid=iqn.1991-05.com.microsoft:ibm-t410s password=mytargetsecret userid_mutual=iqn.2003-01.org.linux-iscsi.san01.x8664:sn.05135a0e4a11 password_mutual=mymutualsecret
 Parameter userid is now 'iqn.1991-05.com.microsoft:ibm-t410s'.
 Parameter password is now 'mytargetsecret'.
@@ -436,7 +454,7 @@ AUTH CONFIG GROUP
 <p>Enable TPG Authentication for all Endpoints in a TPG:
 
 </p>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> /iscsi/iqn.2003-01.org.linuxiscsi.
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> /iscsi/iqn.2003-01.org.linuxiscsi.
 san01.x8664:sn.bf919196ff4e/tgpt1/ set attribute demo_mode_write_protect=0 generate_node_acls=1
 cache_dynamic_acls=1
 Parameter demo_mode_write_protect is now '0'.
@@ -452,7 +470,7 @@ Parameter cache_dynamic_acls is now '1'.
 <li>The userid_mutual (login name) and password_mutual (initiator secret) for the initiator.
 </li>
 </ul>
-<pre><code>/iscsi/iqn.20...a0e4a11/tpgt1> set auth userid=rts-user
+<pre><code class="language-bash">/iscsi/iqn.20...a0e4a11/tpgt1> set auth userid=rts-user
 Parameter userid is now 'rts-user'.
 /iscsi/iqn.20...a0e4a11/tpgt1> set auth password=b492785e-bc91-4710
 Parameter password is now 'b492785e-bc91-4710'.
@@ -504,7 +522,7 @@ AUTH CONFIG GROUP
 <p>Enable CHAP initiator discovery authentication for all initiators by setting up a CHAP userid (login name) and password (target secret) in the global discovery_auth group:
 
 </p>
-<pre><code>/iscsi> set discovery_auth enable=1 userid=mytargetuid password=mytargetsecret
+<pre><code class="language-bash">/iscsi> set discovery_auth enable=1 userid=mytargetuid password=mytargetsecret
 Parameter enable is now '1'.
 Parameter password is now 'mytargetsecret'.
 Parameter userid is now 'mytargetuid'.
@@ -524,7 +542,7 @@ Parameter userid is now 'mytargetuid'.
     <li>The mutual_userid (login name) and mutual_password (initiator secret) for initiators.
 </li>
 </ul>
-<pre><code>/iscsi> set discovery_auth enable=1 userid=mytargetuid password=mytargetsecret
+<pre><code class="language-bash">/iscsi> set discovery_auth enable=1 userid=mytargetuid password=mytargetsecret
 mutual_userid=mymutualuid mutual_password=mymutualsecret
 Parameter password is now 'mytargetsecret'.
 Parameter userid is now 'mytargetuid'.
@@ -556,7 +574,7 @@ DISCOVERY_AUTH CONFIG GROUP
 <p>The resulting iSCSI object hierarchy with CHAP Authentication (initiator or mutual) for one initiator looks as follows (displayed from the root object):
 
 </p>
-<pre><code>/> ls
+<pre><code class="language-bash">/> ls
 o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
@@ -583,7 +601,7 @@ o- / ..................................................................... [...]
 <p>The resulting object tree looks as follows:
 
 </p>
-<pre><code>o- / ..................................................................... [...]
+<pre><code class="language-bash">o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
   | o- iblock ............................................... [1 Storage Object]
@@ -607,7 +625,7 @@ o- / ..................................................................... [...]
 <p>The following Python code illustrates how to setup a basic iSCSI target and export a mapped LUN:
 
 </p>
-<pre><code>#!/usr/bin/python
+<pre><code class="language-bash">#!/usr/bin/python
 # iSCSI setup script example with RTSlib
 from rtslib import *
 
@@ -657,7 +675,125 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
       dropdown.classList.remove('open');
     }
   });
+  // Hamburger menu
+const menuToggle = document.getElementById('menu-toggle');
+const menuDropdown = document.getElementById('menu-dropdown');
+const themeToggle = document.getElementById('theme-toggle');
+const fontSizeToggle = document.getElementById('font-size-toggle');
+const body = document.body;
+
+// Open/close menu
+menuToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menuDropdown.classList.toggle('open');
+  
+});
+
+// Close when clicking outside
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+    menuDropdown.classList.remove('open');
+  }
+});
+
+// Load theme: prefer saved choice, else system preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+  body.classList.add('dark-mode');
+} else if (savedTheme === 'light') {
+  body.classList.remove('dark-mode');
+} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  body.classList.add('dark-mode');
+}
+
+// Dark mode toggle
+themeToggle.addEventListener('click', () => {
+  body.classList.toggle('dark-mode');
+  if (body.classList.contains('dark-mode')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+  menuDropdown.classList.remove('open');
+});
+
+// Font size toggle
+fontSizeToggle.addEventListener('click', () => {
+  if (body.classList.contains('large-text')) {
+    body.classList.remove('large-text');
+    fontSizeToggle.textContent = "Increase font size";
+    localStorage.removeItem('font-size');
+  } else {
+    body.classList.add('large-text');
+    fontSizeToggle.textContent = "Reset font size";
+    localStorage.setItem('font-size', 'large');
+  }
+  menuDropdown.classList.remove('open');
+});
+
+// Load font size preference
+if (localStorage.getItem('font-size') === 'large') {
+  body.classList.add('large-text');
+  fontSizeToggle.textContent = "Reset font size";
+}
+
+
+
   </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const backToTopBtn = document.getElementById('back-to-top');
+  if (!backToTopBtn) return;
+
+  const updateVisibility = () => {
+    backToTopBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
+  };
+
+  updateVisibility(); // set initial state
+  window.addEventListener('scroll', updateVisibility);
+
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialise highlight.js on all code blocks
+  hljs.highlightAll();
+
+  const body = document.body;
+  const darkThemeLink = document.getElementById('hljs-theme-dark');
+  const lightThemeLink = document.getElementById('hljs-theme-light');
+
+  // Whenever dark mode toggles, swap the highlight theme
+  const syncHighlightTheme = () => {
+    if (body.classList.contains('dark-mode')) {
+      darkThemeLink.removeAttribute('disabled');
+      lightThemeLink.setAttribute('disabled','');
+    } else {
+      lightThemeLink.removeAttribute('disabled');
+      darkThemeLink.setAttribute('disabled','');
+    }
+  };
+
+  // Call once on page load
+  syncHighlightTheme();
+
+  // Hook into your existing dark-mode button
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      // your code already toggles dark-mode on body
+      // just wait a tick then sync highlight theme
+      setTimeout(syncHighlightTheme, 0);
+    });
+  }
+});
+</script>
+
+ <button id="back-to-top" aria-label="Back to top">↑</button>
+
   <footer>
     <p>Based on the original work at
        <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
@@ -668,6 +804,6 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
       </a>
     </p>
   </footer>
- 
+
 </body>
 </html>
