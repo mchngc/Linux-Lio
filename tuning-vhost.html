@@ -5,28 +5,47 @@
   <title>Linux-IO Documentation</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Highlight.js core -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      id="hljs-theme-light">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      id="hljs-theme-dark" disabled>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 </head>
 <body>
   <header>
-    <div class="logo">
-      <a href="index.html">Linux SCSI Target IO</a>
-    </div>
-    <nav>
-    <ul>
-      <li><a href="#overview">Overview</a></li>
-      <li class="dropdown-parent">
-  <a href="#" id="code-toggle">Code ▾</a>
-  <ul class="dropdown">
-    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
-    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
-    <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
-  </ul>
-</li>
+  <div class="logo">
+    <a href="index.html">Linux SCSI Target IO</a>
+  </div>
 
-      <li><a href="docs.html">Documentation</a></li>
-    </ul>
-  </nav>
-  </header>
+  <div class="header-right">
+    <nav>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li class="dropdown-parent">
+          <a href="#" id="code-toggle">Code ▾</a>
+          <ul class="dropdown">
+            <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+            <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+            <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+          </ul>
+        </li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+    </nav>
+
+    <div class="menu">
+      <button id="menu-toggle" aria-label="Settings">☰</button>
+      <ul class="menu-dropdown" id="menu-dropdown">
+        <li><button id="theme-toggle">Toggle dark mode</button></li>
+       </ul>
+    </div>
+  </div>
+</header>
 
   <main>
     <aside class="sidebar">
@@ -54,6 +73,7 @@
       </ul>
     </aside>
 <section class="content">
+    <h1>vHost Tuning</h1>
     <p>Information can be found on this  <a href="ttps://blogs.oracle.com/linux/post/improving-paravirtualized-iscsi-performance">blog</a></p>
 </section>
 
@@ -81,7 +101,106 @@
       dropdown.classList.remove('open');
     }
   });
+// Hamburger menu
+const menuToggle = document.getElementById('menu-toggle');
+const menuDropdown = document.getElementById('menu-dropdown');
+const themeToggle = document.getElementById('theme-toggle');
+const fontSizeToggle = document.getElementById('font-size-toggle');
+const body = document.body;
+
+// Open/close menu
+menuToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menuDropdown.classList.toggle('open');
+  
+});
+
+// Close when clicking outside
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+    menuDropdown.classList.remove('open');
+  }
+});
+
+// Load theme: prefer saved choice, else system preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+  body.classList.add('dark-mode');
+} else if (savedTheme === 'light') {
+  body.classList.remove('dark-mode');
+} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  body.classList.add('dark-mode');
+}
+
+// Dark mode toggle
+themeToggle.addEventListener('click', () => {
+  body.classList.toggle('dark-mode');
+  if (body.classList.contains('dark-mode')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+  menuDropdown.classList.remove('open');
+});
+
+// Font size toggle
+fontSizeToggle.addEventListener('click', () => {
+  if (body.classList.contains('large-text')) {
+    body.classList.remove('large-text');
+    fontSizeToggle.textContent = "Increase font size";
+    localStorage.removeItem('font-size');
+  } else {
+    body.classList.add('large-text');
+    fontSizeToggle.textContent = "Reset font size";
+    localStorage.setItem('font-size', 'large');
+  }
+  menuDropdown.classList.remove('open');
+});
+
+// Load font size preference
+if (localStorage.getItem('font-size') === 'large') {
+  body.classList.add('large-text');
+  fontSizeToggle.textContent = "Reset font size";
+}
+
+
+
+  </script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialise highlight.js on all code blocks
+  hljs.highlightAll();
+
+  const body = document.body;
+  const darkThemeLink = document.getElementById('hljs-theme-dark');
+  const lightThemeLink = document.getElementById('hljs-theme-light');
+
+  // Whenever dark mode toggles, swap the highlight theme
+  const syncHighlightTheme = () => {
+    if (body.classList.contains('dark-mode')) {
+      darkThemeLink.removeAttribute('disabled');
+      lightThemeLink.setAttribute('disabled','');
+    } else {
+      lightThemeLink.removeAttribute('disabled');
+      darkThemeLink.setAttribute('disabled','');
+    }
+  };
+
+  // Call once on page load
+  syncHighlightTheme();
+
+  // Hook into your existing dark-mode button
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      // your code already toggles dark-mode on body
+      // just wait a tick then sync highlight theme
+      setTimeout(syncHighlightTheme, 0);
+    });
+  }
+});
 </script>
+
   <footer>
     <p>Based on the original work at
        <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
