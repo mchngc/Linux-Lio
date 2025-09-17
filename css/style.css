@@ -54,17 +54,13 @@ main {
 }
 
 .sidebar {
-  width: 250px;
-  background: #f1f1f1;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 1rem;
 }
 
 .sidebar h2 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  color: #20232a;
+  color: var(--sidebar-text);
 }
 
 .sidebar ul {
@@ -124,8 +120,9 @@ main {
 
 .content p {
   font-size: 1rem;
-  color: #333;
+  color: var(--text);
 }
+
 
 img.center {
   margin-top: 2rem;
@@ -267,14 +264,30 @@ table {
 }
 
 td, th {
-  border: 1px solid #dddddd;
+  border: 1px solid var(--border); /* uses your existing border var */
   text-align: left;
   padding: 8px;
+  color: var(--text);
+  background-color: var(--card-bg); /* use card background for consistency */
 }
 
-tr:nth-child(even) {
-  background-color: #dddddd;
+
+tr:nth-child(even) td {
+  background-color: #f2f2f2; /* light grey */
 }
+
+body.dark-mode td,
+body.dark-mode th {
+  background-color: #1e1e1e; /* dark surface */
+  color: #e0e0e0;            /* light text */
+  border-color: #333;         /* subtle dark border */
+}
+
+/* Alternate row background in dark mode */
+body.dark-mode tr:nth-child(even) td {
+  background-color: #2a2a2a; /* slightly lighter than #1e1e1e for striping */
+}
+
 .info-box {
   display: flex;
   align-items: flex-start;
@@ -387,17 +400,43 @@ footer a {
   color: #005f99;
 }
 :root {
+  /* Light theme (existing) */
   --bg: #ffffff;
-  --sidebar: #f7f7f7;
-  --text: #222;
-  --text-dim: #555;
-  --brand: #326CE5;
-  --brand-hover: #244fa6;
-  --border: #ddd;
-  --card-bg: #fff;
-  --header-bg: #0b1f33;  /* dark header */
+  --sidebar: #f4f4f4;
+  --text: #333333;
+  --text-dim: #555555;
+  --brand: #6269ef; /* example primary color */
+  --brand-hover: #2e37ec;
+  --border: #dddddd;
+  --card-bg: #ffffff;
+  --header-bg: #5862f5;
   --header-text: #ffffff;
+  --sidebar-bg: #f4f4f4;
+  --sidebar-text: #333333;
+  --sidebar-link: #333333;
+  --sidebar-link-hover: #2e37ec;  
+  /* etc… */
 }
+
+body.dark-mode {
+  /* Material Dark Theme palette */
+  --bg: #121212;              /* main background */
+  --sidebar: #2C2C2C;          /* sidebar / secondary surfaces */
+  --card-bg: #1E1E1E;          /* cards, panels, surfaces */
+  --text: #E0E0E0;             /* primary text */
+  --text-dim: #A3A3A3;         /* secondary text */
+  --header-bg: #1E1E1E;
+  --header-text: #E0E0E0;
+  --border: #333333;
+  --brand: #6269ef;            /* primary accent */
+  --brand-hover: #2e37ec;      /* darker variant for hover states */
+  --error: #CF6679; 
+  --sidebar-bg: #1e1e1e;
+  --sidebar-text: #e0e0e0;
+  --sidebar-link: #e0e0e0;
+  --sidebar-link-hover: #2e37ec;           /* error/warning accents */
+}
+
 
 /* Base */
 * { box-sizing: border-box; }
@@ -459,8 +498,15 @@ main {
   padding: 0;
 }
 .sidebar li { margin: .4rem 0; }
-.sidebar a { color: var(--text-dim); }
-.sidebar a:hover { color: var(--brand); }
+.sidebar a {
+  color: var(--sidebar-link);
+  text-decoration: none;
+  display: block;
+  padding: 0.3rem 0;
+}
+.sidebar a:hover {
+  color: var(--sidebar-link-hover);
+}
 .sidebar-dropdown { display: none; margin-left: 1rem; }
 .sidebar-dropdown.open { display: block; }
 
@@ -601,6 +647,226 @@ header nav a:hover {
 .nowrap {
   white-space: nowrap;
 }
+body {
+  background: var(--bg);
+  color: var(--text);
+}
 
+header {
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.sidebar {
+  background: var(--sidebar);
+}
+
+.card, .content-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+a, .brand-link {
+  color: var(--brand);
+}
+
+a:hover, .brand-link:hover {
+  color: var(--brand-hover);
+}
+
+.warning-box {
+  background: #332f2f; /* maybe surface variant dark red tint? */
+  border-left: 4px solid var(--error);
+  color: var(--text);
+}
+body, p {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+/* Settings / Preferences menu */
+.menu {
+  position: relative;
+}
+
+#menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--header-text);
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  min-width: 180px;
+  z-index: 1000;
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+
+  /* Animation setup */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-10px);
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.menu-dropdown.open {
+  max-height: 500px; /* big enough to fit all items */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.menu-dropdown li {
+  margin: 0;
+}
+
+.menu-dropdown button,
+.menu-dropdown a {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
+  display: block;
+}
+
+.menu-dropdown button:hover,
+.menu-dropdown a:hover {
+  background: var(--sidebar);
+}
+
+/* Larger text mode */
+body.large-text {
+  font-size: 1.1rem;
+}
+
+body.large-text p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* space between nav and hamburger */
+}
+
+.header-right nav ul {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sidebar, .sidebar a {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+/* Dark mode overrides for code blocks and boxes */
+body.dark-mode pre,
+body.dark-mode code {
+  background: #1e1e1e;         /* dark background */
+  color: #e0e0e0;              /* light text */
+  border-color: #333;          /* subtle border */
+}
+
+body.dark-mode pre[data-lang]::before {
+  background: #333;            /* language label background */
+  color: #aaa;
+}
+
+body.dark-mode .info-box {
+  background-color: #1a2b3b;   /* darker blue tint */
+  border-left-color: #2196f3;
+  color: #e0e0e0;
+}
+
+body.dark-mode .notice-box {
+  background-color: #3b2f1a;   /* darker orange tint */
+  border-left-color: #ff9800;
+  color: #e0e0e0;
+}
+
+body.dark-mode .warning-box {
+  background-color: #3b1a1a;   /* darker red tint */
+  border-left-color: #cf6679;  /* your --error color */
+  color: #e0e0e0;
+}
+/* Dark mode Prism overrides */
+body.dark-mode code[class*="language-"],
+body.dark-mode pre[class*="language-"] {
+  background: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+/* Back to Top button */
+#back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: none;                /* hidden until scroll */
+  background: var(--brand);     /* your theme colour */
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: background-color 0.3s, opacity 0.3s;
+  z-index: 1000;
+}
+
+#back-to-top:hover {
+  background: var(--brand-hover);
+}
+
+/* Dark mode override if needed */
+body.dark-mode #back-to-top {
+  background: var(--brand);
+  color: #fff;
+}
+/* Light mode footer */
+footer {
+  background-color: #f5f5f5;   /* light background */
+  color: #333;                 /* dark text */
+  padding: 20px;
+  text-align: center;
+}
+
+footer a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Dark mode footer */
+body.dark-mode footer {
+  background-color: #1c1c1c;   /* dark background */
+  color: #e0e0e0;              /* light text */
+}
+
+body.dark-mode footer a {
+  color: #9ecaff;              /* light blue links in dark mode */
+}
+
+body.dark-mode footer a:hover {
+  text-decoration: underline;
+}
+footer {
+  transition: background-color 0.3s, color 0.3s;
+}
 
 
