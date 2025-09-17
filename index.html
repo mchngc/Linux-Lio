@@ -6,6 +6,16 @@
   <title>LinuxIO (LIO) — Linux SCSI Target IO</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Highlight.js core -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      id="hljs-theme-light">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      id="hljs-theme-dark" disabled>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 </head>
 <body>
   <!-- Site Header -->
@@ -13,22 +23,33 @@
   <div class="logo">
     <a href="index.html">Linux SCSI Target IO</a>
   </div>
-  <nav>
-    <ul>
-      <li><a href="#overview">Overview</a></li>
-      <li class="dropdown-parent">
-  <a href="#" id="code-toggle">Code ▾</a>
-  <ul class="dropdown">
-    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
-    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
-    <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
-  </ul>
-</li>
 
-      <li><a href="docs.html">Documentation</a></li>
-    </ul>
-  </nav>
+  <div class="header-right">
+    <nav>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li class="dropdown-parent">
+          <a href="#" id="code-toggle">Code ▾</a>
+          <ul class="dropdown">
+            <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+            <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+            <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+          </ul>
+        </li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+    </nav>
+
+    <div class="menu">
+      <button id="menu-toggle" aria-label="Settings">☰</button>
+      <ul class="menu-dropdown" id="menu-dropdown">
+        <li><button id="theme-toggle">Toggle dark mode</button></li>
+
+      </ul>
+    </div>
+  </div>
 </header>
+
 
 
   <!-- Hero -->
@@ -113,7 +134,7 @@
         </div>
 
         <div id="frontend-matrix" class="info-box" role="note">
-          <div class="info-icon">ℹ️</div>
+          <div class="info-icon"></div>
           <div class="info-text">
             Tip: You can mix protocols to match your fabric strategy. For host examples, see <code>targetcli</code>.
           </div>
@@ -150,7 +171,7 @@
           <code>targetcli</code> provides the fabric-agnostic single-node management shell for LIO.
           It aggregates and exports all LIO SAN functionality via the RTSlib library and API.
         </p>
-<pre data-lang="bash"><code>$ targetcli
+<pre><code class="language-bash">$ targetcli
 /> ls
 o- / ................................................................... 
   o- backstores ........................................................ 
@@ -171,7 +192,7 @@ o- / ...................................................................
             </ul>
           </div>
           <div class="notice-box" role="status">
-            <div class="notice-icon">✅</div>
+            <div class="notice-icon"></div>
             <div class="notice-text">
               LIO enables VMware Ready certifications and passes Microsoft Windows® Failover Cluster compatibility tests.
             </div>
@@ -192,6 +213,135 @@ o- / ...................................................................
     </article>
   </main>
 
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Top-nav code dropdown
+  const codeToggle = document.getElementById('code-toggle');
+  const topDropdown = document.querySelector('header nav .dropdown');
+  document.addEventListener('click', (e) => {
+    if (codeToggle && codeToggle.contains(e.target)) {
+      e.preventDefault();
+      topDropdown && topDropdown.classList.toggle('open');
+    } else if (topDropdown && !topDropdown.contains(e.target)) {
+      topDropdown.classList.remove('open');
+    }
+  });
+
+  // Smooth-scroll for internal links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      const el = document.querySelector(id);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+
+  // Menu / settings
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuDropdown = document.getElementById('menu-dropdown');
+  const themeToggle = document.getElementById('theme-toggle');
+  const body = document.body;
+
+  if (menuToggle && menuDropdown) {
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuDropdown.classList.toggle('open');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+        menuDropdown.classList.remove('open');
+      }
+    });
+  }
+
+  // Theme handling
+  function setTheme(mode) {
+    if (mode === 'dark') {
+      body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    setTheme(savedTheme);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    setTheme('dark');
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      setTheme(body.classList.contains('dark-mode') ? 'light' : 'dark');
+      menuDropdown && menuDropdown.classList.remove('open');
+    });
+  }
+
+
+  // Back-to-top button: only wire up if the element exists
+  const backToTopBtn = document.getElementById('back-to-top');
+  if (backToTopBtn) {
+    const updateVisibility = () => {
+      backToTopBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
+    };
+    // initial state (in case page loads scrolled)
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility);
+
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+});
+
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialise highlight.js on all code blocks
+  hljs.highlightAll();
+
+  const body = document.body;
+  const darkThemeLink = document.getElementById('hljs-theme-dark');
+  const lightThemeLink = document.getElementById('hljs-theme-light');
+
+  // Whenever dark mode toggles, swap the highlight theme
+  const syncHighlightTheme = () => {
+    if (body.classList.contains('dark-mode')) {
+      darkThemeLink.removeAttribute('disabled');
+      lightThemeLink.setAttribute('disabled','');
+    } else {
+      lightThemeLink.removeAttribute('disabled');
+      darkThemeLink.setAttribute('disabled','');
+    }
+  };
+
+  // Call once on page load
+  syncHighlightTheme();
+
+  // Hook into your existing dark-mode button
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      // your code already toggles dark-mode on body
+      // just wait a tick then sync highlight theme
+      setTimeout(syncHighlightTheme, 0);
+    });
+  }
+});
+</script>
+
+
+ <button id="back-to-top" aria-label="Back to top">↑</button>
   <footer>
     <p>Based on the original work at
        <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
@@ -203,32 +353,5 @@ o- / ...................................................................
     </p>
   </footer>
 
-  <script>
-    // Dropdown
-    const toggle = document.getElementById('code-toggle');
-    const dropdown = document.querySelector('.dropdown');
-    document.addEventListener('click', (e) => {
-      if (toggle && toggle.contains(e.target)) {
-        e.preventDefault();
-        dropdown.classList.toggle('open');
-      } else if (dropdown && !dropdown.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
-    });
-
-    // Smooth-scroll
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        const id = a.getAttribute('href');
-        const el = document.querySelector(id);
-        if (el) {
-          e.preventDefault();
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          history.pushState(null, '', id);
-        }
-      });
-    });
-  </script>
- 
 </body>
 </html>
