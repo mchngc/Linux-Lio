@@ -5,29 +5,47 @@
   <title>Linux-IO Documentation</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Highlight.js core -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      id="hljs-theme-light">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      id="hljs-theme-dark" disabled>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 </head>
 <body>
   <header>
-    <div class="logo">
-      <a href="index.html">Linux SCSI Target IO</a>
-    </div>
+  <div class="logo">
+    <a href="index.html">Linux SCSI Target IO</a>
+  </div>
+
+  <div class="header-right">
     <nav>
-    <ul>
-      <li><a href="#overview">Overview</a></li>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
         <li class="dropdown-parent">
-        <a href="#" id="code-toggle">Code ▾</a>
-    <ul class="dropdown">
-    <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
-    <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
-        <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+          <a href="#" id="code-toggle">Code ▾</a>
+          <ul class="dropdown">
+            <li><a href="https://github.com/open-iscsi/targetcli-fb/">targetcli</a></li>
+            <li><a href="https://github.com/open-iscsi/rtslib-fb/">rtslib</a></li>
+            <li><a href="https://github.com/open-iscsi/tcmu-runner">tcmu-runner</a></li>
+          </ul>
+        </li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+    </nav>
 
-    </ul>
-</li>
-
-      <li><a href="docs.html">Documentation</a></li>
-    </ul>
-  </nav>
-  </header>
+    <div class="menu">
+      <button id="menu-toggle" aria-label="Settings">☰</button>
+      <ul class="menu-dropdown" id="menu-dropdown">
+        <li><button id="theme-toggle">Toggle dark mode</button></li>
+       </ul>
+    </div>
+  </div>
+</header>
 
   <main>
     <aside class="sidebar">
@@ -93,7 +111,7 @@
     <p>To enable target mode, add the following parameter to the qla2xxx module configuration file:
 
 </p>
-    <pre><code>options qla2xxx qlini_mode="disabled"
+    <pre><code class="language-bash">options qla2xxx qlini_mode="disabled"
 </code></pre>
 
 <p>Depending on your distribution, the module configuration file might be different, for instance:
@@ -151,7 +169,7 @@ acls/ create &lt;Initiator WWPN&gt;</td>
 <p>targetcli is invoked by running targetcli as root from the command prompt of the underlying LIO shell.
 
 </p>
-<pre><code># targetcli
+<pre><code class="language-bash"># targetcli
 Welcome to targetcli:
 
  Copyright (c) 2014 by Datera, Inc.
@@ -182,7 +200,7 @@ Corresponding kernel module: tcm_qla2xxx
 <p>Use ls to list the object hierarchy, which is initially empty:
 
 </p>
-<pre><code>/> ls
+<pre><code class="language-bash">/> ls
 o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
@@ -211,7 +229,7 @@ o- / ..................................................................... [...]
 <p>Optionally, set auto_cd_after_create=false to prevent targetcli from automatically entering new object contexts after their creation:
 
 </p>
-<pre><code>/> set global auto_cd_after_create=false
+<pre><code class="language-bash">/> set global auto_cd_after_create=false
 Parameter auto_cd_after_create is now 'false'.
 /></code></pre>
 
@@ -223,7 +241,7 @@ Parameter auto_cd_after_create is now 'false'.
 <p>For instance, enter the top-level backstore context and create an IBLOCK backstore from a /dev/sdb block device:
 
 </p>
-<pre><code>/> cd backstores/
+<pre><code class="language-bash">/> cd backstores/
 /backstores> iblock/ create name=my_disk dev=/dev/sdb
 Generating a wwn serial.
 Created iblock storage object my_disk using /dev/sdb.
@@ -237,7 +255,7 @@ Entering new node /backstores/iblock/my_disk.
 <p>The resulting object hierarchy looks as follows (displayed from the root object):
 
 </p>
-<pre><code>/> ls
+<pre><code class="language-bash">/> ls
 o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
@@ -257,7 +275,7 @@ o- / ..................................................................... [...]
 <p>For instance, create an IBLOCK backstore on a logical volume (under /dev/<volume_group_name>/<logical_volume_name>):
 
 </p>
-<pre><code>/backstores> iblock/ create name=my_disk dev=/dev/vg0/lv1
+<pre><code class="language-bash">/backstores> iblock/ create name=my_disk dev=/dev/vg0/lv1
 Generating a wwn serial.
 Created iblock storage object my_disk using /dev/vg0/lv1.
 Entering new node /backstores/iblock/my_disk.
@@ -287,7 +305,7 @@ Entering new node /backstores/iblock/my_disk.
 <p>Instantiate a Fibre Channel target, in this example for QLogic HBAs, on the existing IBLOCK backstore device my_disk (as set up in targetcli):
 
 </p>
-<pre><code>/backstores/iblock/my_disk> /qla2xxx create 21:00:00:24:ff:31:4c:48
+<pre><code class="language-bash">/backstores/iblock/my_disk> /qla2xxx create 21:00:00:24:ff:31:4c:48
 Created target 21:00:00:24:ff:31:4c:48.
 Entering new node /qla2xxx/21:00:00:24:ff:31:4c:48.
 /qla2xxx/21:0...4:ff:31:4c:48></code></pre>
@@ -299,7 +317,7 @@ Entering new node /qla2xxx/21:00:00:24:ff:31:4c:48.
 <p>Declare LUNs for the backstore device, to form a valid SAN storage object:
 
 </p>
-<pre><code>/qla2xxx/21:0...4:ff:31:4c:48> luns/ create /backstores/iblock/my_disk
+<pre><code class="language-bash">/qla2xxx/21:0...4:ff:31:4c:48> luns/ create /backstores/iblock/my_disk
 Selected LUN 0.
 Successfully created LUN 0.
 Entering new node /qla2xxx/21:00:00:24:ff:31:4c:48/luns/lun0.
@@ -311,7 +329,7 @@ Entering new node /qla2xxx/21:00:00:24:ff:31:4c:48/luns/lun0.
 <p>Return to the underlying Endpoint as the working context, as no attributes need to be set or modified for standard LUNs:
 
 </p>
-<pre><code>/qla2xxx/21:0...:48/luns/lun0> cd <
+<pre><code class="language-bash">/qla2xxx/21:0...:48/luns/lun0> cd <
 Taking you back to /qla2xxx/21:00:00:24:ff:31:4c:48.
 /qla2xxx/21:0...4:ff:31:4c:48></code></pre>
 <h2>Define access rights</h2>
@@ -321,12 +339,12 @@ Taking you back to /qla2xxx/21:00:00:24:ff:31:4c:48.
 <p>Determine the WWPN for the respective Fibre Channel initiator. For instance, for Linux initiator systems, use:
 
 </p>
-<pre><code># cat /sys/class/fc_host/host*/port_name | sed -e s/0x// -e 's/../&:/g' -e s/:$//
+<pre><code class="language-bash"># cat /sys/class/fc_host/host*/port_name | sed -e s/0x// -e 's/../&:/g' -e s/:$//
 </code></pre>
 <p>For a simple setup, grant access to the initiator with the WWPN as determined above:
 
 </p>
-<pre><code>/qla2xxx/21:0...4:ff:31:4c:48> acls/ create 21:00:00:24:ff:31:4c:4c
+<pre><code class="language-bash">/qla2xxx/21:0...4:ff:31:4c:48> acls/ create 21:00:00:24:ff:31:4c:4c
 Successfully created Node ACL for 21:00:00:24:ff:31:4c:4c.
 Created mapped LUN 0.
 Entering new node /qla2xxx/21:00:00:24:ff:31:4c:48/acls/21:00:00:24:ff:31:4c:4c.
@@ -341,7 +359,7 @@ Entering new node /qla2xxx/21:00:00:24:ff:31:4c:48/acls/21:00:00:24:ff:31:4c:4c.
 <p>The resulting Fibre Channel SAN object hierarchy looks as follows (displayed from the root object):
 
 </p>
-<pre><code>/> ls
+<pre><code class="language-bash">/> ls
 o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
@@ -371,7 +389,7 @@ o- / ..................................................................... [...]
 <p>The following Python code illustrates how to setup a basic Fibre Channel target and export a mapped LUN:
 
 </p>
-<pre><code>#!/usr/bin/python
+<pre><code class="language-bash">#!/usr/bin/python
 # Fibre Channel setup script example with RTSlib
 from rtslib import *
 
@@ -403,7 +421,7 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
 <p>The resulting object tree looks as follows:
 
 </p>
-<pre><code>o- / ..................................................................... [...]
+<pre><code class="language-bash">o- / ..................................................................... [...]
   o- backstores .......................................................... [...]
   | o- fileio ............................................... [0 Storage Object]
   | o- iblock ............................................... [1 Storage Object]
@@ -460,7 +478,126 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)</code></pre>
       dropdown.classList.remove('open');
     }
   });
+  // Hamburger menu
+const menuToggle = document.getElementById('menu-toggle');
+const menuDropdown = document.getElementById('menu-dropdown');
+const themeToggle = document.getElementById('theme-toggle');
+const fontSizeToggle = document.getElementById('font-size-toggle');
+const body = document.body;
+
+// Open/close menu
+menuToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menuDropdown.classList.toggle('open');
+  
+});
+
+// Close when clicking outside
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+    menuDropdown.classList.remove('open');
+  }
+});
+
+// Load theme: prefer saved choice, else system preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+  body.classList.add('dark-mode');
+} else if (savedTheme === 'light') {
+  body.classList.remove('dark-mode');
+} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  body.classList.add('dark-mode');
+}
+
+// Dark mode toggle
+themeToggle.addEventListener('click', () => {
+  body.classList.toggle('dark-mode');
+  if (body.classList.contains('dark-mode')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+  menuDropdown.classList.remove('open');
+});
+
+// Font size toggle
+fontSizeToggle.addEventListener('click', () => {
+  if (body.classList.contains('large-text')) {
+    body.classList.remove('large-text');
+    fontSizeToggle.textContent = "Increase font size";
+    localStorage.removeItem('font-size');
+  } else {
+    body.classList.add('large-text');
+    fontSizeToggle.textContent = "Reset font size";
+    localStorage.setItem('font-size', 'large');
+  }
+  menuDropdown.classList.remove('open');
+});
+
+// Load font size preference
+if (localStorage.getItem('font-size') === 'large') {
+  body.classList.add('large-text');
+  fontSizeToggle.textContent = "Reset font size";
+}
+
+
+
   </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const backToTopBtn = document.getElementById('back-to-top');
+  if (!backToTopBtn) return;
+
+  const updateVisibility = () => {
+    backToTopBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
+  };
+
+  updateVisibility(); // set initial state
+  window.addEventListener('scroll', updateVisibility);
+
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialise highlight.js on all code blocks
+  hljs.highlightAll();
+
+  const body = document.body;
+  const darkThemeLink = document.getElementById('hljs-theme-dark');
+  const lightThemeLink = document.getElementById('hljs-theme-light');
+
+  // Whenever dark mode toggles, swap the highlight theme
+  const syncHighlightTheme = () => {
+    if (body.classList.contains('dark-mode')) {
+      darkThemeLink.removeAttribute('disabled');
+      lightThemeLink.setAttribute('disabled','');
+    } else {
+      lightThemeLink.removeAttribute('disabled');
+      darkThemeLink.setAttribute('disabled','');
+    }
+  };
+
+  // Call once on page load
+  syncHighlightTheme();
+
+  // Hook into your existing dark-mode button
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      // your code already toggles dark-mode on body
+      // just wait a tick then sync highlight theme
+      setTimeout(syncHighlightTheme, 0);
+    });
+  }
+});
+</script>
+
+ <button id="back-to-top" aria-label="Back to top">↑</button>
+
+
   <footer>
     <p>Based on the original work at
        <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
