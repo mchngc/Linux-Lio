@@ -14,7 +14,17 @@
       id="hljs-theme-dark" disabled>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Prism.js themes -->
+<link id="prism-light" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
+<link id="prism-dark" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" disabled>
+<script src="https://unpkg.com/lucide@latest"></script>
 
+<!-- Shared site JavaScript -->
+<script src="js/main.js"></script>
+
+<!-- Prism.js -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
 </head>
 <body>
   <header>
@@ -38,12 +48,9 @@
       </ul>
     </nav>
 
-    <div class="menu">
-      <button id="menu-toggle" aria-label="Settings">☰</button>
-      <ul class="menu-dropdown" id="menu-dropdown">
-        <li><button id="theme-toggle">Toggle dark mode</button></li>
-       </ul>
-    </div>
+    <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+  <i data-lucide="moon"></i>
+</button>
   </div>
 </header>
 
@@ -680,147 +687,13 @@ mapped_lun = node_acl.mapped_lun(0, 0, False)
 
   </main>
 
-  <script>
-    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-      toggle.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('data-target');
-        const dropdown = document.getElementById(targetId);
-        dropdown.classList.toggle('open');
-      });
-    });
-    const toggle = document.getElementById('code-toggle');
-  const dropdown = document.querySelector('header nav .dropdown');
-  document.addEventListener('click', (e) => {
-    if (toggle && toggle.contains(e.target)) {
-      e.preventDefault();
-      dropdown.classList.toggle('open');
-    } else if (dropdown && !dropdown.contains(e.target)) {
-      dropdown.classList.remove('open');
-    }
-  });
-  // Hamburger menu
-const menuToggle = document.getElementById('menu-toggle');
-const menuDropdown = document.getElementById('menu-dropdown');
-const themeToggle = document.getElementById('theme-toggle');
-const fontSizeToggle = document.getElementById('font-size-toggle');
-const body = document.body;
-
-// Open/close menu
-menuToggle.addEventListener('click', (e) => {
-  e.stopPropagation();
-  menuDropdown.classList.toggle('open');
   
-});
-
-// Close when clicking outside
-document.addEventListener('click', (e) => {
-  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
-    menuDropdown.classList.remove('open');
-  }
-});
-
-// Load theme: prefer saved choice, else system preference
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
-  body.classList.add('dark-mode');
-} else if (savedTheme === 'light') {
-  body.classList.remove('dark-mode');
-} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  body.classList.add('dark-mode');
-}
-
-// Dark mode toggle
-themeToggle.addEventListener('click', () => {
-  body.classList.toggle('dark-mode');
-  if (body.classList.contains('dark-mode')) {
-    localStorage.setItem('theme', 'dark');
-  } else {
-    localStorage.setItem('theme', 'light');
-  }
-  menuDropdown.classList.remove('open');
-});
-
-// Font size toggle
-fontSizeToggle.addEventListener('click', () => {
-  if (body.classList.contains('large-text')) {
-    body.classList.remove('large-text');
-    fontSizeToggle.textContent = "Increase font size";
-    localStorage.removeItem('font-size');
-  } else {
-    body.classList.add('large-text');
-    fontSizeToggle.textContent = "Reset font size";
-    localStorage.setItem('font-size', 'large');
-  }
-  menuDropdown.classList.remove('open');
-});
-
-// Load font size preference
-if (localStorage.getItem('font-size') === 'large') {
-  body.classList.add('large-text');
-  fontSizeToggle.textContent = "Reset font size";
-}
-
-
-
-  </script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const backToTopBtn = document.getElementById('back-to-top');
-  if (!backToTopBtn) return;
-
-  const updateVisibility = () => {
-    backToTopBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
-  };
-
-  updateVisibility(); // set initial state
-  window.addEventListener('scroll', updateVisibility);
-
-  backToTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialise highlight.js on all code blocks
-  hljs.highlightAll();
-
-  const body = document.body;
-  const darkThemeLink = document.getElementById('hljs-theme-dark');
-  const lightThemeLink = document.getElementById('hljs-theme-light');
-
-  // Whenever dark mode toggles, swap the highlight theme
-  const syncHighlightTheme = () => {
-    if (body.classList.contains('dark-mode')) {
-      darkThemeLink.removeAttribute('disabled');
-      lightThemeLink.setAttribute('disabled','');
-    } else {
-      lightThemeLink.removeAttribute('disabled');
-      darkThemeLink.setAttribute('disabled','');
-    }
-  };
-
-  // Call once on page load
-  syncHighlightTheme();
-
-  // Hook into your existing dark-mode button
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      // your code already toggles dark-mode on body
-      // just wait a tick then sync highlight theme
-      setTimeout(syncHighlightTheme, 0);
-    });
-  }
-});
-</script>
 
  <button id="back-to-top" aria-label="Back to top">↑</button>
   <footer>
     <p>Based on the original work at
        <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
-      <a href="https://github.com/mchngc" target = "_blank">
+      <a href="www.linkedin.com/in/max-christie-005022255" target = "_blank">
         Max Christie
         </a>
       .Thanks to Nicholas Bellinger for creating LIO.
