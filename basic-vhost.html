@@ -14,6 +14,17 @@
       id="hljs-theme-dark" disabled>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Prism.js themes -->
+<link id="prism-light" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
+<link id="prism-dark" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" disabled>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<!-- Shared site JavaScript -->
+<script src="js/main.js"></script>
+
+<!-- Prism.js -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
 
 </head>
 <body>
@@ -38,13 +49,9 @@
       </ul>
     </nav>
 
-    <div class="menu">
-      <button id="menu-toggle" aria-label="Settings">☰</button>
-      <ul class="menu-dropdown" id="menu-dropdown">
-        <li><button id="theme-toggle">Toggle dark mode</button></li>
-       </ul>
-    </div>
-  </div>
+    <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+  <i data-lucide="moon"></i>
+</button>
 </header>
 
   <main>
@@ -78,7 +85,7 @@
 
 
 <h2>Host Setup</h2>
-<p>vhost-scsi combined with QEMU presents the guest a virtual SCSI controller with N LUNs that can be backed by physical NVMe drives, SAS/SATA disks, RAM disks, or any block device Linux supports.To emulate SCSI commands and interact with the backstore device, it uses the Linux kernel LIO/target layer. That target device is then passed to QEMU's vhost layer which handles communication between the guest and host. This section describes how to setup the target with targetcli, then edit a libvirt xml file so when tools like virsh start the VM they have QEMU bind the kernel's target device to the VM.</p>
+<p>vhost-scsi combined with QEMU presents the guest a virtual SCSI controller with N LUNs that can be backed by physical NVMe drives, SAS/SATA disks, RAM disks, or any block device Linux supports.To emulate SCSI commands and interact with the backstore device, it uses the Linux kernel LIO/target layer. That target device is then passed to QEMU's vhost-scsi layer which handles communication between the guest and host. This section describes how to setup the target with targetcli, then edit a libvirt xml file so when tools like virsh start the VM they have QEMU bind the kernel's target device to the VM.</p>
 
 <h3>LIO vhost-scsi Device Initialization with targetcli</h3>
 <p>If you have already setup devices with targetcli and rebooted the system, then to re-initialize them in the kernel run:</p>
@@ -146,7 +153,7 @@ o- vhost .......................................................................
 /vhost> cd naa.1111111111111111/tpg1/luns
 /vhost/naa.11...111/tpg1/luns> create /backstores/block/vol0
 Created LUN 0.</code></pre>
-<p>Above, we cd'd to the vhost directory, then used the "create" command to create a vhost-scsi device we gave the name "naa.1111111111111111". We then cd'd to the luns directory and mapped vol0 to LUN 0. If you don't pass in a LUN value to the create command the next available one is assigned.</p>
+<p>Above, we cd'd to the vhost-scsi directory, then used the "create" command to create a vhost-scsi device we gave the name "naa.1111111111111111". We then cd'd to the luns directory and mapped vol0 to LUN 0. If you don't pass in a LUN value to the create command the next available one is assigned.</p>
 <p>You can now, create more disks and map them to LUNs on the same vhost-scsi device or create more disks and vhost-scsi devices.</p>
 <p>When you are done creating disks/targets, you can run "exit". The configuration will be saved in /etc/target/saveconfig.json. When the system is rebooted you can run "targetcli restoreconfig" to load the disks and targets back into the kernel.</p>
 <pre><code class="language-bash">/vhost/naa.11...111/tpg1/luns> exit
@@ -240,141 +247,7 @@ $ fio randread.4jobs.fio
 
   </main>
 
-  <script>
-    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-      toggle.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('data-target');
-        const dropdown = document.getElementById(targetId);
-        dropdown.classList.toggle('open');
-      });
-    });
-    const toggle = document.getElementById('code-toggle');
-  const dropdown = document.querySelector('header nav .dropdown');
-  document.addEventListener('click', (e) => {
-    if (toggle && toggle.contains(e.target)) {
-      e.preventDefault();
-      dropdown.classList.toggle('open');
-    } else if (dropdown && !dropdown.contains(e.target)) {
-      dropdown.classList.remove('open');
-    }
-  });
-   // Hamburger menu
-const menuToggle = document.getElementById('menu-toggle');
-const menuDropdown = document.getElementById('menu-dropdown');
-const themeToggle = document.getElementById('theme-toggle');
-const fontSizeToggle = document.getElementById('font-size-toggle');
-const body = document.body;
-
-// Open/close menu
-menuToggle.addEventListener('click', (e) => {
-  e.stopPropagation();
-  menuDropdown.classList.toggle('open');
   
-});
-
-// Close when clicking outside
-document.addEventListener('click', (e) => {
-  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
-    menuDropdown.classList.remove('open');
-  }
-});
-
-// Load theme: prefer saved choice, else system preference
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
-  body.classList.add('dark-mode');
-} else if (savedTheme === 'light') {
-  body.classList.remove('dark-mode');
-} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  body.classList.add('dark-mode');
-}
-
-// Dark mode toggle
-themeToggle.addEventListener('click', () => {
-  body.classList.toggle('dark-mode');
-  if (body.classList.contains('dark-mode')) {
-    localStorage.setItem('theme', 'dark');
-  } else {
-    localStorage.setItem('theme', 'light');
-  }
-  menuDropdown.classList.remove('open');
-});
-
-// Font size toggle
-fontSizeToggle.addEventListener('click', () => {
-  if (body.classList.contains('large-text')) {
-    body.classList.remove('large-text');
-    fontSizeToggle.textContent = "Increase font size";
-    localStorage.removeItem('font-size');
-  } else {
-    body.classList.add('large-text');
-    fontSizeToggle.textContent = "Reset font size";
-    localStorage.setItem('font-size', 'large');
-  }
-  menuDropdown.classList.remove('open');
-});
-
-// Load font size preference
-if (localStorage.getItem('font-size') === 'large') {
-  body.classList.add('large-text');
-  fontSizeToggle.textContent = "Reset font size";
-}
-
-
-
-  </script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const backToTopBtn = document.getElementById('back-to-top');
-  if (!backToTopBtn) return;
-
-  const updateVisibility = () => {
-    backToTopBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
-  };
-
-  updateVisibility(); // set initial state
-  window.addEventListener('scroll', updateVisibility);
-
-  backToTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialise highlight.js on all code blocks
-  hljs.highlightAll();
-
-  const body = document.body;
-  const darkThemeLink = document.getElementById('hljs-theme-dark');
-  const lightThemeLink = document.getElementById('hljs-theme-light');
-
-  // Whenever dark mode toggles, swap the highlight theme
-  const syncHighlightTheme = () => {
-    if (body.classList.contains('dark-mode')) {
-      darkThemeLink.removeAttribute('disabled');
-      lightThemeLink.setAttribute('disabled','');
-    } else {
-      lightThemeLink.removeAttribute('disabled');
-      darkThemeLink.setAttribute('disabled','');
-    }
-  };
-
-  // Call once on page load
-  syncHighlightTheme();
-
-  // Hook into your existing dark-mode button
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      // your code already toggles dark-mode on body
-      // just wait a tick then sync highlight theme
-      setTimeout(syncHighlightTheme, 0);
-    });
-  }
-});
-</script>
 
  <button id="back-to-top" aria-label="Back to top">↑</button>
 </body>
