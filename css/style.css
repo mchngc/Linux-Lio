@@ -807,28 +807,40 @@ body.dark-mode pre[class*="language-"] {
   background: #1e1e1e !important;
   color: #e0e0e0 !important;
 }
-/* Back to Top button */
+/* Back-to-top button */
 #back-to-top {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  display: none;                /* hidden until scroll */
-  background: var(--brand);     /* your theme colour */
+  background: var(--brand);
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.2rem;
+  width: 44px;
+  height: 44px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: background-color 0.3s, opacity 0.3s;
-  z-index: 1000;
+  font-size: 1.1rem;
+  display: none;               /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease, opacity 0.2s ease;
+  z-index: 1001;
 }
 
+/* visible state */
+#back-to-top.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* hover */
 #back-to-top:hover {
+  transform: scale(1.05);
   background: var(--brand-hover);
 }
+
 
 /* Dark mode override if needed */
 body.dark-mode #back-to-top {
@@ -868,5 +880,234 @@ body.dark-mode footer a:hover {
 footer {
   transition: background-color 0.3s, color 0.3s;
 }
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--header-text);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.2);
+  color: var(--brand);
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+#theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+  color: #ffffff; /* always white */
+}
+
+#theme-toggle:hover {
+  transform: scale(1.2);
+}
+#theme-toggle svg {
+  width: 22px;
+  height: 22px;
+}
+/* ===== Responsive Styles ===== */
+@media (max-width: 768px) {
+  /* Header adjustments */
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 1rem;
+  }
+
+  header .header-right {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  header nav ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  header nav ul li {
+    display: block;
+  }
+
+  /* Sidebar collapses */
+  .sidebar {
+    position: relative;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    border-top: 1px solid var(--border-color, #ccc);
+    margin-bottom: 1rem;
+  }
+
+  .sidebar.open {
+    max-height: 500px; /* enough to show menu items */
+  }
+
+  /* Content takes full width */
+  main {
+    flex-direction: column;
+  }
+
+  .content {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  header {
+    padding: 0.5rem;
+  }
+
+  #theme-toggle,
+  #font-size-toggle {
+    transform: scale(0.9);
+  }
+
+  #back-to-top {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
+/* --- Sidebar Drawer Styles --- */
+.sidebar-toggle {
+  display: none; /* hidden on desktop */
+  background: var(--brand, #6200ee);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .jump-links {
+    position: relative;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: var(--sidebar-bg, #f4f4f4);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color, #ccc);
+    border-radius: 6px;
+    padding: 0 1rem;
+  }
+
+  .jump-links.open {
+    max-height: 500px; /* expand enough to show content */
+    padding: 1rem;
+  }
+
+  .sidebar-toggle {
+    display: block; /* show toggle button */
+  }
+
+  /* Stack layout instead of side-by-side */
+  main.container.content {
+    flex-direction: column;
+  }
+
+  article.prose {
+    width: 100%;
+  }
+}
+header nav ul li .dropdown {
+  display: none;
+  position: absolute;
+  background: var(--header-bg, #fff);
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0;
+  list-style: none;
+  min-width: 180px;
+  z-index: 1000;
+}
+
+header nav ul li .dropdown li {
+  padding: 0;
+}
+
+header nav ul li .dropdown li a {
+  display: block;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: var(--header-text, #333);
+}
+
+header nav ul li .dropdown li a:hover {
+  background: var(--brand, #6200ee);
+  color: #fff;
+}
+
+header nav ul li .dropdown.open {
+  display: block;
+}
+/* --- Header dropdown animation --- */
+header nav ul li .dropdown {
+  display: block;               /* always in flow so it can animate */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-5px);
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+header nav ul li .dropdown.open {
+  max-height: 500px;            /* big enough for content */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Sidebar dropdown animation --- */
+.sidebar-dropdown {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-5px);
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar-dropdown.open {
+  max-height: 1000px;           /* allow full expansion */
+  opacity: 1;
+  transform: translateY(0);
+}
+.sidebar-dropdown li {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar-dropdown.open li {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sidebar-dropdown.open li:nth-child(1) { transition-delay: 0.05s; }
+.sidebar-dropdown.open li:nth-child(2) { transition-delay: 0.1s; }
+.sidebar-dropdown.open li:nth-child(3) { transition-delay: 0.15s; }
+/* etc. */
 
 
