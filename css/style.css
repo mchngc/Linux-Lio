@@ -1174,5 +1174,119 @@ header nav ul li .dropdown.open {
     display: block;
   }
 }
+/* ---------- Mobile header & mobile sidebar-links ---------- */
+
+/* default: hide hamburger on desktop */
+.hamburger-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--header-text);
+}
+
+/* mobile-only container for sidebar link groups (populated by JS) */
+.mobile-sidebar-links {
+  display: none; /* desktop: hidden */
+  margin-top: 1rem;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+
+  /* show hamburger on mobile (left corner) */
+  .hamburger-toggle {
+    display: block;
+    order: 0; /* keep it at the left */
+    margin-right: 0.5rem;
+  }
+
+  /* stack header content better */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  /* header-right pushed to the end (right) */
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Hide desktop nav by default on mobile */
+  #header-nav {
+    display: none;
+    width: 100%;
+    background: var(--header-bg);
+    padding: 0.5rem 0.5rem;
+    position: absolute;
+    top: 56px; /* sits under header; adjust if header height differs */
+    left: 0;
+    z-index: 999;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    flex-direction: column;
+  }
+
+  /* When opened by JS */
+  #header-nav.open {
+    display: flex;
+  }
+  #header-nav ul {
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0.4rem 0;
+    list-style: none;
+  }
+  #header-nav ul li a {
+    display: block;
+    padding: 0.6rem 1rem;
+    width: 100%;
+  }
+
+  /* place theme toggle to right corner and keep visible */
+  #theme-toggle {
+    order: 2;
+  }
+
+  /* Show the mobile-sidebar-links area and style it */
+  .mobile-sidebar-links {
+    display: block;
+    background: var(--sidebar);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+  }
+
+  .mobile-sidebar-links h3 {
+    margin: 0 0 .5rem 0;
+    font-size: 1rem;
+  }
+
+  .mobile-sidebar-links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-sidebar-links li {
+    margin: 0.2rem 0;
+  }
+
+  .mobile-sidebar-links a {
+    display: block;
+    padding: 0.35rem 0;
+    text-decoration: none;
+    color: var(--sidebar-link);
+  }
+
+  /* keep aside.sidebar collapsed as defined earlier (you already have .sidebar max-height rules) */
+}
 
 
