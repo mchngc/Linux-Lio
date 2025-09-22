@@ -397,5 +397,71 @@ if (hamburgerToggle && headerNav) {
     }
   });
 }
+document.addEventListener('DOMContentLoaded', function () {
+  // --- Hamburger header nav toggle ---
+  const hamburger = document.getElementById('hamburger-toggle');
+  const headerNav = document.getElementById('header-nav');
+
+  if (hamburger && headerNav) {
+    hamburger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      headerNav.classList.toggle('open');
+    });
+
+    // Close header nav on outside click
+    document.addEventListener('click', function (e) {
+      if (!headerNav.contains(e.target) && !hamburger.contains(e.target)) {
+        headerNav.classList.remove('open');
+      }
+    });
+  }
+
+  // --- Mobile sidebar links: clone specific sidebar dropdowns into content on mobile ---
+  const basicDropdown = document.getElementById('basic-dropdown');
+  const tuningDropdown = document.getElementById('tuning-dropdown');
+  const mobileLinks = document.getElementById('mobile-sidebar-links');
+
+  function populateMobileSidebarLinks() {
+    if (!mobileLinks) return;
+    mobileLinks.innerHTML = ''; // reset
+
+    if (window.innerWidth <= 768) {
+      // Basic Setup
+      if (basicDropdown) {
+        const section = document.createElement('div');
+        section.className = 'mobile-section';
+        const h = document.createElement('h3');
+        h.textContent = 'Basic Setup';
+        const clone = basicDropdown.cloneNode(true);
+        clone.removeAttribute('id'); // avoid duplicate IDs
+        section.appendChild(h);
+        section.appendChild(clone);
+        mobileLinks.appendChild(section);
+      }
+
+      // Tuning
+      if (tuningDropdown) {
+        const section = document.createElement('div');
+        section.className = 'mobile-section';
+        const h = document.createElement('h3');
+        h.textContent = 'Tuning';
+        const clone = tuningDropdown.cloneNode(true);
+        clone.removeAttribute('id');
+        section.appendChild(h);
+        section.appendChild(clone);
+        mobileLinks.appendChild(section);
+      }
+
+      mobileLinks.setAttribute('aria-hidden', 'false');
+    } else {
+      mobileLinks.setAttribute('aria-hidden', 'true');
+      mobileLinks.innerHTML = '';
+    }
+  }
+
+  // initial populate and on resize
+  populateMobileSidebarLinks();
+  window.addEventListener('resize', populateMobileSidebarLinks);
+});
 
 });
