@@ -19,12 +19,18 @@
 </head>
 <body>
   <header>
+  <!-- Left: Hamburger -->
+  <button id="hamburger-toggle" class="hamburger-toggle" aria-label="Open menu">☰</button>
+
+  <!-- Center: Logo -->
   <div class="logo">
     <a href="index.html">Linux SCSI Target IO</a>
   </div>
 
+  <!-- Right: Nav + Dark/Light toggle -->
   <div class="header-right">
-    <nav>
+    <!-- Navigation -->
+    <nav id="header-nav">
       <ul>
         <li><a href="#overview">Overview</a></li>
         <li class="dropdown-parent">
@@ -39,12 +45,9 @@
       </ul>
     </nav>
 
-    <div class="menu">
-      <button id="menu-toggle" aria-label="Settings">☰</button>
-      <ul class="menu-dropdown" id="menu-dropdown">
-        <li><button id="theme-toggle">Toggle dark mode</button></li>
-       </ul>
-    </div>
+    <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+      <i data-lucide="moon"></i>
+    </button>
   </div>
 </header>
 <aside class="sidebar mobile-only">
