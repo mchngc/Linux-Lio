@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const targetId = this.getAttribute('data-target');
       const dropdown = document.getElementById(targetId);
-      dropdown.classList.toggle('open');
+      if (dropdown) dropdown.classList.toggle('open');
     });
   });
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', (e) => {
     if (codeToggle && codeToggle.contains(e.target)) {
       e.preventDefault();
-      codeDropdown.classList.toggle('open');
+      codeDropdown?.classList.toggle('open');
     } else if (codeDropdown && !codeDropdown.contains(e.target)) {
       codeDropdown.classList.remove('open');
     }
@@ -31,36 +31,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mode === 'dark') {
       body.classList.add('dark-mode');
       localStorage.setItem('theme', 'dark');
-      themeToggle.innerHTML = '<i data-lucide="sun"></i>';
-      prismLight.disabled = true;
-      prismDark.disabled = false;
+      if (themeToggle) themeToggle.innerHTML = '<i data-lucide="sun"></i>';
+      if (prismLight) prismLight.disabled = true;
+      if (prismDark) prismDark.disabled = false;
     } else {
       body.classList.remove('dark-mode');
       localStorage.setItem('theme', 'light');
-      themeToggle.innerHTML = '<i data-lucide="moon"></i>';
-      prismLight.disabled = false;
-      prismDark.disabled = true;
+      if (themeToggle) themeToggle.innerHTML = '<i data-lucide="moon"></i>';
+      if (prismLight) prismLight.disabled = false;
+      if (prismDark) prismDark.disabled = true;
     }
-    lucide.createIcons();
+    if (window.lucide && lucide.createIcons) lucide.createIcons();
   }
 
-  // Load theme preference
   const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    setTheme(savedTheme);
-  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    setTheme('dark');
-  } else {
-    setTheme('light');
-  }
+  if (savedTheme) setTheme(savedTheme);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
+  else setTheme('light');
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
-      if (body.classList.contains('dark-mode')) {
-        setTheme('light');
-      } else {
-        setTheme('dark');
-      }
+      if (body.classList.contains('dark-mode')) setTheme('light');
+      else setTheme('dark');
     });
   }
 
@@ -75,21 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ---------------- Hamburger menu toggle ----------------
-  const hamburger = document.getElementById('hamburger-toggle');
-  const nav = document.getElementById('header-nav');
+  
 
-  if (hamburger && nav) {
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      nav.classList.toggle('open');
-    });
-
-    // Close nav if clicking outside
-    document.addEventListener('click', (e) => {
-      if (!nav.contains(e.target) && !hamburger.contains(e.target)) {
-        nav.classList.remove('open');
-      }
-    });
-  }
 });
+
