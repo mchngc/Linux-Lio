@@ -381,5 +381,21 @@ if (sidebarToggleDocs && sidebar) {
     sidebar.classList.toggle('open');
   });
 }
+// Header hamburger menu
+const hamburgerToggle = document.getElementById('hamburger-toggle');
+const headerNav = document.getElementById('header-nav');
+
+if (hamburgerToggle && headerNav) {
+  hamburgerToggle.addEventListener('click', () => {
+    headerNav.classList.toggle('open');
+  });
+
+  // Close when clicking outside (optional)
+  document.addEventListener('click', (e) => {
+    if (!headerNav.contains(e.target) && !hamburgerToggle.contains(e.target)) {
+      headerNav.classList.remove('open');
+    }
+  });
+}
 
 });
