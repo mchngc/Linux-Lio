@@ -372,5 +372,14 @@ if (sidebarToggle && jumpLinks) {
     jumpLinks.classList.toggle('open');
   });
 }
+// Sidebar toggle for docs page
+const sidebarToggleDocs = document.getElementById('sidebar-toggle');
+const sidebar = document.querySelector('.sidebar');
+
+if (sidebarToggleDocs && sidebar) {
+  sidebarToggleDocs.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+}
 
 });
