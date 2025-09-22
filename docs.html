@@ -2,38 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Linux-IO Documentation</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+
   <!-- Highlight.js core -->
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
-      id="hljs-theme-light">
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
-      id="hljs-theme-dark" disabled>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+        id="hljs-theme-light">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+        id="hljs-theme-dark" disabled>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="js/main.js"></script>
-<!-- Prism.js themes -->
-<link id="prism-light" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
-<link id="prism-dark" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" disabled>
-<script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Prism.js themes -->
+  <link id="prism-light" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
+  <link id="prism-dark" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" disabled>
 
-
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/main.js" defer></script>
 </head>
 <body>
   <header>
-    <button id="hamburger-toggle" class="hamburger-toggle" aria-label="Open menu">☰</button>
+  <!-- Left: Hamburger -->
+  <button id="hamburger-toggle" class="hamburger-toggle" aria-label="Open menu">☰</button>
 
+  <!-- Center: Logo -->
   <div class="logo">
     <a href="index.html">Linux SCSI Target IO</a>
   </div>
-    <button id="hamburger-toggle" class="hamburger-toggle">☰</button>
 
-<div class="header-right">
-    <nav id="header-nav" aria-label="Main navigation">
+  <!-- Right: Nav + Dark/Light toggle -->
+  <div class="header-right">
+    <!-- Navigation -->
+    <nav id="header-nav">
       <ul>
         <li><a href="#overview">Overview</a></li>
         <li class="dropdown-parent">
@@ -48,14 +50,38 @@
       </ul>
     </nav>
 
-     <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+    <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
       <i data-lucide="moon"></i>
     </button>
   </div>
 </header>
+<aside class="sidebar mobile-only">
+  <h2>Docs Menu</h2>
+  <ul>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="basic-dropdown">Basic Setup</a>
+          <ul class="sidebar-dropdown" id="basic-dropdown">
+            <li><a href="basic-iscsi.html">iSCSI</a></li>
+            <li><a href="basic-vhost.html">vhost-scsi</a></li>
+            <li><a href="basic-fcoe.html">FCoE</a></li>
+            <li><a href="basic-fibre.html">Fibre Channel</a></li>
+            <li><a href="basic-ibm-vscsi.html">IBM vSCSi (System P)</a></li>
+            <li><a href="basic-iser.html">ISER (InfiniBand)</a></li>
+            <li><a href="basic-loopback.html">Loopback</a></li>
+            <li><a href="basic-srp.html">SRP (Infiniband)</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-target="tuning-dropdown">Tuning</a>
+          <ul class="sidebar-dropdown" id="tuning-dropdown">
+            <li><a href="tuning-vhost.html">vhost-scsi</a></li>
+          </ul>
+        </li>
+      </ul>
+</aside>
+
 
   <main class="container content">
-    <div id="mobile-sidebar-links" class="mobile-sidebar-links" aria-hidden="true"></div>
     <aside class="sidebar">
       <h2>Docs Menu</h2>
       <ul>
@@ -90,11 +116,6 @@
     </section>
   </main>
 
-  <script>
-
-</script>
-
- <button id="back-to-top" aria-label="Back to top">↑</button>
-
+  <button id="back-to-top" aria-label="Back to top">↑</button>
 </body>
 </html>
