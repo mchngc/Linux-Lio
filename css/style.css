@@ -1520,6 +1520,120 @@ header nav ul li .dropdown.open {
   aside.sidebar { display: none; }
   aside.sidebar.mobile-only { display: block; }
 }
+/* Sidebar behavior on desktop vs mobile */
+@media (min-width: 769px) {
+  /* Desktop: sidebar left inside main */
+  main.container.content {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+  }
+
+  aside.sidebar {
+    display: block;       /* visible on desktop */
+    order: 0;
+    width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile: sidebar becomes a top block */
+  main.container.content {
+    display: block;       /* stack layout */
+  }
+
+  aside.sidebar {
+    width: 100%;
+    margin: 0.5rem 0 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    order: -1;            /* put above the main content */
+  }
+
+  section.content {
+    width: 100%;
+  }
+}
+/* Sidebar position responsive */
+@media (min-width: 769px) {
+  /* Desktop: sidebar on the left */
+  main.container.content {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+  }
+
+  aside.sidebar {
+    order: 0;
+    width: 240px;
+  }
+
+  section.content {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile: sidebar above the content */
+  main.container.content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  aside.sidebar {
+    order: -1;   /* move above main content */
+    width: 100%;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+  }
+
+  section.content {
+    order: 0;
+    width: 100%;
+  }
+}
+/* Desktop: sidebar on the left */
+@media (min-width: 769px) {
+  main.container.content {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+  }
+
+  aside.sidebar {
+    order: 0;
+    width: 240px;
+  }
+
+  section.content {
+    order: 1;
+  }
+}
+
+/* Mobile: sidebar on top */
+@media (max-width: 768px) {
+  main.container.content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  aside.sidebar {
+    order: -1; /* move above docs content */
+    width: 100%;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+  }
+
+  section.content {
+    order: 0;
+    width: 100%;
+  }
+}
 
 
 
