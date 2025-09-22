@@ -918,50 +918,7 @@ footer {
   height: 22px;
 }
 /* ===== Responsive Styles ===== */
-@media (max-width: 768px) {
-  /* Header adjustments */
-  
 
-  header .header-right {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 0.5rem;
-  }
-
-  header nav ul {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  header nav ul li {
-    display: block;
-  }
-
-  /* Sidebar collapses */
-  .sidebar {
-    position: relative;
-    width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    border-top: 1px solid var(--border-color, #ccc);
-    margin-bottom: 1rem;
-  }
-
-  .sidebar.open {
-    max-height: 500px; /* enough to show menu items */
-  }
-
-  /* Content takes full width */
-  main {
-    flex-direction: column;
-  }
-
-  .content {
-    width: 100%;
-  }
-}
 
 @media (max-width: 480px) {
   body {
@@ -997,37 +954,7 @@ footer {
 }
 
 /* Mobile styles */
-@media (max-width: 768px) {
-  .jump-links {
-    position: relative;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    background: var(--sidebar-bg, #f4f4f4);
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color, #ccc);
-    border-radius: 6px;
-    padding: 0 1rem;
-  }
 
-  .jump-links.open {
-    max-height: 500px; /* expand enough to show content */
-    padding: 1rem;
-  }
-
-  .sidebar-toggle {
-    display: block; /* show toggle button */
-  }
-
-  /* Stack layout instead of side-by-side */
-  main.container.content {
-    flex-direction: column;
-  }
-
-  article.prose {
-    width: 100%;
-  }
-}
 header nav ul li .dropdown {
   display: none;
   position: absolute;
@@ -1106,36 +1033,7 @@ header nav ul li .dropdown.open {
 .sidebar-dropdown.open li:nth-child(3) { transition-delay: 0.15s; }
 /* etc. */
 /* Make main stack vertically on small screens */
-@media (max-width: 768px) {
-  main.container.content {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-  }
 
-  aside.jump-links {
-    width: 100%;
-    max-height: 0; /* collapsed */
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-
-  aside.jump-links.open {
-    max-height: 500px; /* enough to show links */
-  }
-
-  .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-
-  .hero .hero-copy h1 {
-    font-size: 1.5rem;
-  }
-
-  .hero .hero-copy p {
-    font-size: 0.95rem;
-  }
-}
 
 @media (max-width: 480px) {
   .card-grid {
@@ -1153,23 +1051,7 @@ header nav ul li .dropdown.open {
 }
 
 /* Mobile breakpoint */
-@media (max-width: 768px) {
-  #header-nav {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    background: var(--header-bg);
-    padding: 1rem 0;
-  }
 
-  #header-nav.open {
-    display: flex;
-  }
-
-  .hamburger-toggle {
-    display: block;
-  }
-}
 /* ---------- Mobile header & mobile sidebar-links ---------- */
 
 /* default: hide hamburger on desktop */
@@ -1190,170 +1072,11 @@ header nav ul li .dropdown.open {
 }
 
 /* Mobile styles */
-@media (max-width: 768px) {
 
-  /* show hamburger on mobile (left corner) */
-  .hamburger-toggle {
-    display: block;
-    order: 0; /* keep it at the left */
-    margin-right: 0.5rem;
-  }
-
-  /* stack header content better */
-  header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.8rem;
-  }
-
-  /* header-right pushed to the end (right) */
-  .header-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  /* Hide desktop nav by default on mobile */
-  #header-nav {
-    display: none;
-    width: 100%;
-    background: var(--header-bg);
-    padding: 0.5rem 0.5rem;
-    position: absolute;
-    top: 56px; /* sits under header; adjust if header height differs */
-    left: 0;
-    z-index: 999;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    flex-direction: column;
-  }
-
-  /* When opened by JS */
-  #header-nav.open {
-    display: flex;
-  }
-  #header-nav ul {
-    flex-direction: column;
-    gap: 0;
-    margin: 0;
-    padding: 0.4rem 0;
-    list-style: none;
-  }
-  #header-nav ul li a {
-    display: block;
-    padding: 0.6rem 1rem;
-    width: 100%;
-  }
-
-  /* place theme toggle to right corner and keep visible */
-  #theme-toggle {
-    order: 2;
-  }
-
-  /* Show the mobile-sidebar-links area and style it */
-  .mobile-sidebar-links {
-    display: block;
-    background: var(--sidebar);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-  }
-
-  .mobile-sidebar-links h3 {
-    margin: 0 0 .5rem 0;
-    font-size: 1rem;
-  }
-
-  .mobile-sidebar-links ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .mobile-sidebar-links li {
-    margin: 0.2rem 0;
-  }
-
-  .mobile-sidebar-links a {
-    display: block;
-    padding: 0.35rem 0;
-    text-decoration: none;
-    color: var(--sidebar-link);
-  }
-
-  /* keep aside.sidebar collapsed as defined earlier (you already have .sidebar max-height rules) */
-}
 /* ===== Compact header override for small screens =====
    Paste at the BOTTOM of style.css to override earlier rules.
 */
-@media (max-width: 768px) {
-  /* keep header compact and horizontal */
-  header {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.5rem;
-    padding: 0.4rem 0.75rem !important;
-    height: auto;
-  }
 
-  /* make logo and buttons smaller so header height is minimal */
-  .logo { margin: 0 0.5rem; }
-  .sidebar-toggle,
-  .hamburger-toggle {
-    font-size: 1rem;
-    padding: 0.25rem 0.45rem;
-    line-height: 1;
-  }
-
-  /* push right-side controls to the far right */
-  .header-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    z-index: 1001; /* keep buttons above overlay nav */
-  }
-
-  /* Put the header nav out of the flow so it doesn't expand the header.
-     It becomes an overlay dropdown when .open is added by JS. */
-  #header-nav {
-    display: none !important;
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: var(--header-bg);
-    padding: 0.4rem 0;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    border-radius: 6px;
-    z-index: 1000;
-    flex-direction: column;
-  }
-
-  /* show overlay only when JS toggles .open */
-  #header-nav.open {
-    display: flex !important;
-  }
-
-  /* nav list compact */
-  #header-nav ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  #header-nav ul li a {
-    display: block;
-    padding: 0.55rem 1rem;
-    white-space: nowrap;
-  }
-
-  /* keep the mobile-sidebar-links smaller too */
-  .mobile-sidebar-links {
-    margin-top: 0.6rem;
-  }
-}
 /* ----- Hamburger menu styles ----- */
 .hamburger-toggle {
   background: none;
@@ -1370,42 +1093,7 @@ header nav ul li .dropdown.open {
 }
 
 /* Mobile: hide nav until hamburger clicked */
-@media (max-width: 768px) {
-  .hamburger-toggle {
-    display: block; /* show hamburger */
-  }
 
-  #header-nav {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 100%; /* right below header */
-    left: 0;
-    right: 0;
-    background: var(--header-bg);
-    padding: 0.5rem 1rem;
-    z-index: 1000;
-  }
-
-  #header-nav.open {
-    display: flex;
-  }
-
-  #header-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  #header-nav ul li {
-    margin: 0.5rem 0;
-  }
-
-  #header-nav ul li a {
-    color: var(--header-text);
-    text-decoration: none;
-  }
-}
 /* ----- Hamburger Menu Styles ----- */
 .hamburger-toggle {
   background: none;
@@ -1422,55 +1110,7 @@ header nav ul li .dropdown.open {
 }
 
 /* Mobile: compact header + nav hidden until toggled */
-@media (max-width: 768px) {
-  header {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 0.5rem 0.75rem !important;
-    height: auto;
-  }
 
-  .hamburger-toggle {
-    display: block; /* show hamburger */
-    margin-right: 0.5rem;
-  }
-
-  #header-nav {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 100%; /* sits under header */
-    left: 0;
-    right: 0;
-    background: var(--header-bg);
-    padding: 0.5rem 1rem;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    border-radius: 0 0 6px 6px;
-    z-index: 1000;
-  }
-
-  #header-nav.open {
-    display: flex;
-  }
-
-  #header-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex-direction: column;
-  }
-
-  #header-nav ul li {
-    margin: 0.5rem 0;
-  }
-
-  #header-nav ul li a {
-    color: var(--header-text);
-    text-decoration: none;
-    padding: 0.4rem 0;
-  }
-}
 /* Ensure right-side items (nav + theme toggle) align to far right */
 .header-right {
   margin-left: auto;
@@ -1478,83 +1118,12 @@ header nav ul li .dropdown.open {
   align-items: center;
   gap: 0.5rem;
 }
-@media (max-width: 768px) {
-  /* Reposition theme toggle to top-right corner on mobile */
-  #theme-toggle {
-    position: absolute;
-    right: 0.75rem;
-    top: 0.75rem;
-  }
 
-  /* Prevent overlap with hamburger and logo */
-  header {
-    position: relative;
-  }
-}
 /* Sidebar moves under header on mobile */
-@media (max-width: 768px) {
-  main.container.content {
-    display: block; /* stack content */
-    padding: 1rem;
-  }
 
-  aside.sidebar {
-    position: relative;
-    order: 1;
-    width: 100%;
-    margin: 0.5rem 0 1rem 0;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--sidebar-bg);
-    max-height: none; /* allow natural height */
-    overflow: visible;
-  }
 
-  /* Ensure content follows below sidebar */
-  section.content {
-    width: 100%;
-    order: 2;
-  }
-}
-@media (max-width: 768px) {
-  aside.sidebar { display: none; }
-  aside.sidebar.mobile-only { display: block; }
-}
-/* Sidebar behavior on desktop vs mobile */
-@media (min-width: 769px) {
-  /* Desktop: sidebar left inside main */
-  main.container.content {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 2rem;
-  }
 
-  aside.sidebar {
-    display: block;       /* visible on desktop */
-    order: 0;
-    width: 240px;
-  }
-}
 
-@media (max-width: 768px) {
-  /* Mobile: sidebar becomes a top block */
-  main.container.content {
-    display: block;       /* stack layout */
-  }
-
-  aside.sidebar {
-    width: 100%;
-    margin: 0.5rem 0 1rem 0;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--sidebar-bg);
-    order: -1;            /* put above the main content */
-  }
-
-  section.content {
-    width: 100%;
-  }
-}
 /* Sidebar position responsive */
 @media (min-width: 769px) {
   /* Desktop: sidebar on the left */
@@ -1574,27 +1143,7 @@ header nav ul li .dropdown.open {
   }
 }
 
-@media (max-width: 768px) {
-  /* Mobile: sidebar above the content */
-  main.container.content {
-    display: flex;
-    flex-direction: column;
-  }
 
-  aside.sidebar {
-    order: -1;   /* move above main content */
-    width: 100%;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--sidebar-bg);
-  }
-
-  section.content {
-    order: 0;
-    width: 100%;
-  }
-}
 /* Desktop: sidebar on the left */
 @media (min-width: 769px) {
   main.container.content {
@@ -1614,19 +1163,202 @@ header nav ul li .dropdown.open {
 }
 
 /* Mobile: sidebar on top */
+
+/* === Force sidebar visible on mobile and place it above content === */
+/* --- Mobile Sidebar (collapsed by default, expands when .open is added) --- */
+
+/* --- Docs Sidebar Responsive Behavior --- */
 @media (max-width: 768px) {
+  /* Layout stacks vertically */
   main.container.content {
     display: flex;
     flex-direction: column;
+    padding: 1rem;
   }
 
+  /* Sidebar hidden by default, expands when .open is toggled */
   aside.sidebar {
-    order: -1; /* move above docs content */
+    order: -1;                 /* move above docs content */
     width: 100%;
-    margin-bottom: 1rem;
+    margin: 0.5rem 0 1rem 0;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--sidebar-bg);
+    max-height: 0;             /* collapsed by default */
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  aside.sidebar.open {
+    max-height: 1000px;        /* enough to reveal all links */
+    overflow: visible;
+  }
+
+  /* Ensure docs content flows below */
+  section.content {
+    order: 0;
+    width: 100%;
+  }
+
+  /* Sidebar dropdown animation */
+  .sidebar .sidebar-dropdown {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+  }
+
+  .sidebar .sidebar-dropdown.open {
+    max-height: 500px;
+    opacity: 1;
+  }
+}
+/* Show Docs Menu toggle button on mobile */
+@media (max-width: 768px) {
+  #sidebar-toggle.sidebar-toggle {
+    display: block;              /* make it visible */
+    background: var(--brand, #6200ee);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    border-radius: 4px 4px 0 0;  /* rounded top corners */
+  }
+
+  #sidebar-toggle.sidebar-toggle:hover {
+    background: var(--brand-hover, #2e37ec);
+  }
+}
+/* --- Force mobile Docs Menu toggle --- */
+/* --- FINAL override: mobile Docs Menu toggle --- */
+
+@media (max-width: 768px) {
+  aside.sidebar.open,
+  aside.sidebar.open * {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
+/* --- Mobile: Sidebar on top --- */
+@media (max-width: 768px) {
+  main.container.content {
+    display: flex;
+    flex-direction: column;   /* stack vertically */
+    padding: 1rem;
+  }
+
+  #sidebar-toggle {
+    display: block;           /* show "Docs Menu" button */
+    margin-bottom: 0.5rem;
+    background: var(--brand, #6200ee);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    border-radius: 4px;
+  }
+
+  #sidebar-toggle:hover {
+    background: var(--brand-hover, #2e37ec);
+  }
+
+  aside.sidebar {
+    order: -1;                /* move above content */
+    width: 100%;
+    margin: 0.5rem 0 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    display: none;            /* hidden until toggled */
+    padding: 1rem;
+  }
+
+  aside.sidebar.open {
+    display: block;           /* show when toggled */
+  }
+
+  section.content {
+    order: 0;
+    width: 100%;
+  }
+}
+/* --- Mobile: Sidebar always on top --- */
+@media (max-width: 768px) {
+  main.container.content {
+    display: flex;
+    flex-direction: column;   /* stack vertically */
+    padding: 1rem;
+  }
+
+  aside.sidebar {
+    order: -1;                /* move above content */
+    width: 100%;
+    margin: 0 0 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    padding: 1rem;
+  }
+
+  section.content {
+    order: 0;
+    width: 100%;
+  }
+}
+/* --- Force sidebar visible on mobile --- */
+@media (max-width: 768px) {
+  main.container.content {
+    display: flex;
+    flex-direction: column;   /* stack vertically */
+    padding: 1rem;
+  }
+
+  aside.sidebar {
+    display: block !important;  /* make sure it's never hidden */
+    order: -1;                  /* move above content */
+    width: 100%;
+    margin: 0 0 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    padding: 1rem;
+  }
+
+  section.content {
+    order: 0;
+    width: 100%;
+  }
+}
+/* --- Mobile: Sidebar always visible and usable --- */
+@media (max-width: 768px) {
+  main.container.content {
+    display: flex;
+    flex-direction: column;   /* stack vertically */
+    padding: 1rem;
+  }
+
+  aside.sidebar {
+    display: block !important;   /* force visible */
+    order: -1;                   /* move above content */
+    width: 100%;
+    margin: 0 0 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    padding: 1rem;
+    max-height: none !important; /* prevent collapsing */
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   section.content {
