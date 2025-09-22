@@ -920,11 +920,7 @@ footer {
 /* ===== Responsive Styles ===== */
 @media (max-width: 768px) {
   /* Header adjustments */
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.5rem 1rem;
-  }
+  
 
   header .header-right {
     flex-direction: column;
@@ -1288,5 +1284,242 @@ header nav ul li .dropdown.open {
 
   /* keep aside.sidebar collapsed as defined earlier (you already have .sidebar max-height rules) */
 }
+/* ===== Compact header override for small screens =====
+   Paste at the BOTTOM of style.css to override earlier rules.
+*/
+@media (max-width: 768px) {
+  /* keep header compact and horizontal */
+  header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem !important;
+    height: auto;
+  }
+
+  /* make logo and buttons smaller so header height is minimal */
+  .logo { margin: 0 0.5rem; }
+  .sidebar-toggle,
+  .hamburger-toggle {
+    font-size: 1rem;
+    padding: 0.25rem 0.45rem;
+    line-height: 1;
+  }
+
+  /* push right-side controls to the far right */
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    z-index: 1001; /* keep buttons above overlay nav */
+  }
+
+  /* Put the header nav out of the flow so it doesn't expand the header.
+     It becomes an overlay dropdown when .open is added by JS. */
+  #header-nav {
+    display: none !important;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--header-bg);
+    padding: 0.4rem 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border-radius: 6px;
+    z-index: 1000;
+    flex-direction: column;
+  }
+
+  /* show overlay only when JS toggles .open */
+  #header-nav.open {
+    display: flex !important;
+  }
+
+  /* nav list compact */
+  #header-nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  #header-nav ul li a {
+    display: block;
+    padding: 0.55rem 1rem;
+    white-space: nowrap;
+  }
+
+  /* keep the mobile-sidebar-links smaller too */
+  .mobile-sidebar-links {
+    margin-top: 0.6rem;
+  }
+}
+/* ----- Hamburger menu styles ----- */
+.hamburger-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--header-text);
+  display: none; /* hidden on desktop */
+}
+
+/* Desktop: nav inline */
+#header-nav {
+  display: flex;
+}
+
+/* Mobile: hide nav until hamburger clicked */
+@media (max-width: 768px) {
+  .hamburger-toggle {
+    display: block; /* show hamburger */
+  }
+
+  #header-nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%; /* right below header */
+    left: 0;
+    right: 0;
+    background: var(--header-bg);
+    padding: 0.5rem 1rem;
+    z-index: 1000;
+  }
+
+  #header-nav.open {
+    display: flex;
+  }
+
+  #header-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #header-nav ul li {
+    margin: 0.5rem 0;
+  }
+
+  #header-nav ul li a {
+    color: var(--header-text);
+    text-decoration: none;
+  }
+}
+/* ----- Hamburger Menu Styles ----- */
+.hamburger-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--header-text);
+  display: none; /* hidden on desktop */
+}
+
+/* Desktop: nav inline */
+#header-nav {
+  display: flex;
+}
+
+/* Mobile: compact header + nav hidden until toggled */
+@media (max-width: 768px) {
+  header {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.5rem 0.75rem !important;
+    height: auto;
+  }
+
+  .hamburger-toggle {
+    display: block; /* show hamburger */
+    margin-right: 0.5rem;
+  }
+
+  #header-nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%; /* sits under header */
+    left: 0;
+    right: 0;
+    background: var(--header-bg);
+    padding: 0.5rem 1rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border-radius: 0 0 6px 6px;
+    z-index: 1000;
+  }
+
+  #header-nav.open {
+    display: flex;
+  }
+
+  #header-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+  }
+
+  #header-nav ul li {
+    margin: 0.5rem 0;
+  }
+
+  #header-nav ul li a {
+    color: var(--header-text);
+    text-decoration: none;
+    padding: 0.4rem 0;
+  }
+}
+/* Ensure right-side items (nav + theme toggle) align to far right */
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+@media (max-width: 768px) {
+  /* Reposition theme toggle to top-right corner on mobile */
+  #theme-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+  }
+
+  /* Prevent overlap with hamburger and logo */
+  header {
+    position: relative;
+  }
+}
+/* Sidebar moves under header on mobile */
+@media (max-width: 768px) {
+  main.container.content {
+    display: block; /* stack content */
+    padding: 1rem;
+  }
+
+  aside.sidebar {
+    position: relative;
+    order: 1;
+    width: 100%;
+    margin: 0.5rem 0 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    max-height: none; /* allow natural height */
+    overflow: visible;
+  }
+
+  /* Ensure content follows below sidebar */
+  section.content {
+    width: 100%;
+    order: 2;
+  }
+}
+@media (max-width: 768px) {
+  aside.sidebar { display: none; }
+  aside.sidebar.mobile-only { display: block; }
+}
+
 
 
