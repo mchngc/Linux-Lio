@@ -28,14 +28,17 @@
 <body>
   <!-- Site Header -->
   <header>
-  <button id="sidebar-toggle" class="sidebar-toggle">☰ Menu / On this page</button>
+  <!-- Left: Hamburger -->
+  <button id="hamburger-toggle" class="hamburger-toggle" aria-label="Open menu">☰</button>
 
+  <!-- Center: Logo -->
   <div class="logo">
     <a href="index.html">Linux SCSI Target IO</a>
   </div>
 
+  <!-- Right: Nav + Dark/Light toggle -->
   <div class="header-right">
-    <nav>
+    <nav id="header-nav">
       <ul>
         <li><a href="#overview">Overview</a></li>
         <li class="dropdown-parent">
@@ -51,11 +54,11 @@
     </nav>
 
     <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
-  <i data-lucide="moon"></i>
-</button>
-
+      <i data-lucide="moon"></i>
+    </button>
   </div>
 </header>
+
 
 
 
