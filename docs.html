@@ -25,15 +25,15 @@
 </head>
 <body>
   <header>
-    <button id="sidebar-toggle" class="sidebar-toggle">☰ Docs Menu</button>
+    <button id="hamburger-toggle" class="hamburger-toggle" aria-label="Open menu">☰</button>
 
   <div class="logo">
     <a href="index.html">Linux SCSI Target IO</a>
   </div>
     <button id="hamburger-toggle" class="hamburger-toggle">☰</button>
 
-  <div class="header-right">
-    <nav>
+<div class="header-right">
+    <nav id="header-nav" aria-label="Main navigation">
       <ul>
         <li><a href="#overview">Overview</a></li>
         <li class="dropdown-parent">
@@ -48,12 +48,14 @@
       </ul>
     </nav>
 
-    <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
-  <i data-lucide="moon"></i>
-</button>
+     <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+      <i data-lucide="moon"></i>
+    </button>
+  </div>
 </header>
 
   <main class="container content">
+    <div id="mobile-sidebar-links" class="mobile-sidebar-links" aria-hidden="true"></div>
     <aside class="sidebar">
       <h2>Docs Menu</h2>
       <ul>
