@@ -1146,5 +1146,33 @@ header nav ul li .dropdown.open {
     grid-template-columns: 1fr; /* one card per row */
   }
 }
+/* Default: hamburger hidden on desktop */
+.hamburger-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--header-text);
+}
+
+/* Mobile breakpoint */
+@media (max-width: 768px) {
+  #header-nav {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: var(--header-bg);
+    padding: 1rem 0;
+  }
+
+  #header-nav.open {
+    display: flex;
+  }
+
+  .hamburger-toggle {
+    display: block;
+  }
+}
 
 
