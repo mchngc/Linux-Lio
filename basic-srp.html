@@ -53,7 +53,7 @@
 </header>
 
 
-  <main class = "container content">
+  <main class ="container content">
     <aside class="sidebar">
       <h2>Docs Menu</h2>
       <ul>
@@ -79,175 +79,342 @@
       </ul>
     </aside>
 <section class="content">
-     <h1>vhost-scsi Setup</h1>
-<p>This document describes how to set up a vhost-scsi device using <code class="language-bash">virsh/libvirt</code> or by manually running QEMU.</p>
+<h1>SCSI RDMA Protocol</h1>
+<h2>Overview</h2>
+<p>The SCSI RDMA Protocol (SRP) is a network protocol that allows one computer system to access SCSI devices attached to another computer system via RDMA.[1][2]
 
+</p>
+<p>SRP was designed to use RDMA networks efficiently. RDMA allows lower latencies and higher throughput than TCP/IP protocols, but requires network adapters with native RDMA support, e.g., HCAs for InfiniBand, RNICs on "lossless" (DCB) Ethernet, or TOE NICs with iWARP for standard Ethernet.
 
-<h2>Host Setup</h2>
-<p>vhost-scsi combined with QEMU presents the guest a virtual SCSI controller with N LUNs that can be backed by physical NVMe drives, SAS/SATA disks, RAM disks, or any block device Linux supports.To emulate SCSI commands and interact with the backstore device, it uses the Linux kernel LIO/target layer. That target device is then passed to QEMU's vhost-scsi layer which handles communication between the guest and host. This section describes how to setup the target with targetcli, then edit a libvirt xml file so when tools like virsh start the VM they have QEMU bind the kernel's target device to the VM.</p>
+</p>
+<p>SRP is based on the SCSI protocol, which is a point-to-point protocol with corresponding design limitations. In contrast, iSER is based on iSCSI, and thus better accommodates modern network requirements, including complex topologies, multipathing, target discovery, etc. Hence, iSER is most likely the best choice for InfiniBand networks going forward.
 
-<h3>LIO vhost-scsi Device Initialization with targetcli</h3>
-<p>If you have already setup devices with targetcli and rebooted the system, then to re-initialize them in the kernel run:</p>
-<pre><code class="language-bash"># targetcli restoreconfig
-  Configuration restored from /etc/target/saveconfig.json
-# targetcli ls
-</code></pre>
-<p>If you want to create new device or add more devices run targetcli to enter the shell.</p>
+</p>
+<p>SRP never became an official standard: the latest draft of the SRP protocol, revision 16a, dates from July 3, 2002.[1]
 
-<h3>LIO vhost-scsi Device Creation with targetcli</h3>
-<pre><code class="language-bash"># yum install targetcli   # On Oracle Linux
-# apt-get install targetcli  # On Ubuntu
+</p>
+<p>The InfiniBand/SRP fabric module (srpt.ko, Linux kernel driver database) for the LinuxIO was released with Linux kernel 3.3 on March 18, 2012.[3]
 
-# targetcli
-targetcli shell version 2.1.53
-For help on commands, type 'help'.
+</p>
+<h2>targetcli</h2>
+<p>targetcli is used to configure InfiniBand targets. targetcli aggregates LIO service modules via a core library, and exports them through an API, to provide a unified single-node SAN configuration shell, independently of the underlying fabric(s).
+
+</p>
+
+<h3>Cheat sheet</h3>
+<table>
+  <tr>
+    <th>Command</th>
+    <th>Commemnt</th>
+  </tr>
+  <tr>
+    <td>/backstores/iblock create my_disk /dev/sdb	</td>
+    <td>Create the LUN my_disk on the device /dev/sdb</td>
+  </tr>
+  <tr>
+    <td>//ib_srpt create &lt;WWPN&gt;	</td>
+    <td>Create an SRP target</td>
+  </tr>
+  <tr>
+    <td>In /ib_srpt/&lt;WWPN&gt;:
+luns/ create /backstores/iblock/my_disk</td>
+    <td>Export the LUN my_disk</td>
+  </tr>
+  <tr>
+    <td>In  /ib_srpt/&lt;WWPN&gt;:
+acls/ create &lt;Initiator WWPN&gt;</td>
+<td>Allow access for the initiator at &lt;WWPN&gt;
+</td>
+  </tr>
+  <tr>
+    <td>/saveconfig	</td>
+<td>Commit the configuration</td>
+
+</table>
+
+<h3>Startup</h3>
+<p>targetcli is invoked by running targetcli as root from the command prompt of the underlying LIO shell.
+
+</p>
+<pre><code class="language-bash"># targetcli
+Welcome to targetcli:
+
+ Copyright (c) 2014 by Datera, Inc.
+ All rights reserved.
+
+Visit us at http://www.datera.io.
+
+Using ib_srpt fabric module.
+Using qla2xxx fabric module.
+Using iscsi fabric module.
+Using loopback fabric module.
+
+/> ib_srpt/ info
+Fabric module name: ib_srpt
+ConfigFS path: /sys/kernel/config/target/srpt
+Allowed WWN list type: free
+Fabric module specfile: /var/target/fabric/ib_srpt.spec
+Fabric module features: acls
+Corresponding kernel module: ib_srpt
+/></code></pre>
+<p>Upon targetcli initialization, the underlying RTSlib loads the installed fabric modules, and creates the corresponding ConfigFS mount points (at /sys/kernel/config/target/<fabric>), as specified by the associated spec files (located in /var/target/fabric/fabric.spec).
+
+</p>
+<h3>Display the object tree
+</h3>
+<p>Use ls to list the object hierarchy, which is initially empty:
+
+</p>
+<pre><code class="language-bash">/> ls
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [0 Storage Object]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [0 Target]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]
 />
 </code></pre>
+<div class="info-box">
+  <span class="info-icon"></span>
+  <div class="info-text">
+    <strong>Global parameter auto_cd_after_create</strong><br>
+After the creation of a new object, automatically enter its object context.
+  </div>
+</div>
+<p>Per default, auto_cd_after_create is set to true, which automatically enters an object context (or working directory) after its creation. The examples here are modeled after this behavior.
 
-<p>Create a disk that we gave the name "vol0" and is backed by the physical device /dev/nvme0n1.</p>
+</p>
+<p>Optionally, set auto_cd_after_create=false to prevent targetcli from automatically entering new object contexts after their creation:
+
+</p>
+<pre><code class="language-bash">/> set global auto_cd_after_create=false
+Parameter auto_cd_after_create is now 'false'.
+/></code></pre>
+<h3>Create a backstore</h3>
+<p>Create a backstore using the IBLOCK or FILEIO type devices.
+
+</p>
+<p>For instance, enter the top-level backstore context and create an IBLOCK backstore from a /dev/sdb block device:
+
+</p>
+<pre><code class="language-bash">/> cd backstores/
+/backstores> iblock/ create name=my_disk dev=/dev/sdb
+Generating a wwn serial.
+Created iblock storage object my_disk using /dev/sdb.
+Entering new node /backstores/iblock/my_disk.
+/backstores/iblock/my_disk></code></pre>
+<p>targetcli automatically creates a WWN serial ID for the backstore device and then changes the working context to it.
+
+</p>
+<p>The resulting object hierarchy looks as follows (displayed from the root object):
+
+</p>
 <pre><code class="language-bash">/> ls
-o- / ................................................................................................ [...]
-  o- backstores ..................................................................................... [...]
-  | o- block ......................................................................... [Storage Objects: 0]
-  | o- fileio ........................................................................ [Storage Objects: 0]
-  | o- pscsi ......................................................................... [Storage Objects: 0]
-  | o- ramdisk ....................................................................... [Storage Objects: 0]
-  o- iscsi ................................................................................... [Targets: 0]
-  o- loopback ................................................................................ [Targets: 0]
-  o- srpt .................................................................................... [Targets: 0]
-  o- vhost ................................................................................... [Targets: 0]
-/> cd /backstores/block
-/backstores/block> create dev=/dev/nvme0n1 name=vol0
-Created block storage object vol0 using /dev/nvme0n1.
-/backstores/block> ls
-o- block ............................................................................. [Storage Objects: 1]
-  o- vol0 ................................................ [/dev/nvme0n1 (256.0GiB) write-thru deactivated]
-    o- alua .............................................................................. [ALUA Groups: 1]
-      o- default_tg_pt_gp .................................................. [ALUA state: Active/optimized]
-</code></pre>
-<p>This is cd'd to the device's configuration directory and set the emulate_pr setting to 0. This disables persistent reservation (PR) emulation in the target layer. Instead emulating PR commands in software and storing the state in memory or a local file on the system, the target will pass PR commands directly to the backing device if it supports it. If the device does not support PRs then they will be failed immediately so the application is aware of the lack of support. This avoids a possible performance issue that limits IOPS and throughput and prevents possible corruption if the application is using PRs and the VM is migrated to a different system.</p>
-<pre><code class="language-bash">/backstores/block> cd vol0
-/backstores/block/vol0 set attribute emulate_pr=0
-Parameter emulate_pr is now '0'.
-/backstores/block/vol0> info
-dev: /dev/nvme0n1
-name: vol0
-plugin: block
-readonly: False
-write_back: False
-wwn: 5122f2cd-07dc-4eec-a2d4-c122db6a2a81</code></pre>
-<p>Above, we also ran the "info" command. Note that on the guest udev will use the wwn name from the info command and the device name, vol0, to create persistent names in the /dev/disk directories.
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [1 Storage Object]
+  | | o- my_disk .......................................... [/dev/sdb activated]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [0 Target]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]
+/></code></pre>
+
 </p>
-<p>Next, we will create the vhost-scsi target and then map vol0 to a LUN on it.</p>
-<pre><code class="language-bash">/backstores/block/vol0> cd /vhost
-/vhost> create naa.1111111111111111
-Created target naa.1111111111111111.
-Created TPG 1.
-/vhost> ls
-o- vhost ..................................................................................... [Targets: 1]
-  o- naa.1111111111111111 ....................................................................... [TPGs: 1]
-    o- tpg1 ........................................................... [naa.50014052bee3f148, no-gen-acls]
-      o- acls ................................................................................... [ACLs: 0]
-      o- luns ................................................................................... [LUNs: 0]
-/vhost> cd naa.1111111111111111/tpg1/luns
-/vhost/naa.11...111/tpg1/luns> create /backstores/block/vol0
-Created LUN 0.</code></pre>
-<p>Above, we cd'd to the vhost-scsi directory, then used the "create" command to create a vhost-scsi device we gave the name "naa.1111111111111111". We then cd'd to the luns directory and mapped vol0 to LUN 0. If you don't pass in a LUN value to the create command the next available one is assigned.</p>
-<p>You can now, create more disks and map them to LUNs on the same vhost-scsi device or create more disks and vhost-scsi devices.</p>
-<p>When you are done creating disks/targets, you can run "exit". The configuration will be saved in /etc/target/saveconfig.json. When the system is rebooted you can run "targetcli restoreconfig" to load the disks and targets back into the kernel.</p>
-<pre><code class="language-bash">/vhost/naa.11...111/tpg1/luns> exit
-Global pref auto_save_on_exit=true
-Last 10 configs saved in /etc/target/backup/.
-Configuration saved to /etc/target/saveconfig.json</code></pre>
-<h2>Prepare and Start the Guest</h2>
-<p>Now that the vhost-scsi target is setup, we must setup the guest to use it. This section will describe how to do it with virsh/libvirt or by passing it to QEMU on the command line.
+<p>For instance, create an IBLOCK backstore on a logical volume (under /dev/&lt;volume_group_name&gt;/&lt;logical_volume_name&gt;):
+
 </p>
-<h3>Using virsh</h3>
-<p>This section assumes you have installed libvirt and virsh and have a guest created already. List using existing VMs:</p>
-<pre><code class="language-bash"># virsh list --all
- Id   Name                              State
---------------------------------------------------
--    nshqat05adm02vm01.us.oracle.com
--    nshqat05adm02vm02.us.oracle.com
--    nshqat05adm02vm03.us.oracle.com
-shut off
-shut off
-shut off
+<pre><code class="language-bash">/backstores> iblock/ create name=my_disk dev=/dev/vg0/lv1
+Generating a wwn serial.
+Created iblock storage object my_disk using /dev/vg0/lv1.
+Entering new node /backstores/iblock/my_disk.
+/backstores/iblock/my_disk>
 </code></pre>
-<p>Run virsh to edit one of the VMs listed:</p>
-<pre><code class="language-bash"># virsh edit nshqat35adm02vm03.us.oracle.com</code></pre>
-<h3>Add Device To Guest Definition</h3>
-<p>In the devices section we added a scsi_host hostdev using the name we gave our vhost-scsi target naa.1111111111111111.</p>
+<p>Again, targetcli automatically creates a WWN serial ID for the backstore device and then changes the working context to it.
 
-<pre><code class="language-bash">&lt;domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'&gt;
-...
-        &lt;devices&gt;
-        ...
-                &lt;hostdev mode='subsystem' type='scsi_host' managed='no'&gt;
-                        &lt;source protocol='vhost' wwpn='naa.1111111111111111'/&gt;
-            &lt;/hostdev&gt;
-        ...
-        &lt;/devices&gt;
-&lt;/domain&gt;
-</code></pre>
-<h2>Start Guest</h2>
-<pre><code class="language-bash"># virsh start nshqat35adm02vm03.us.oracle.com</code></pre>
-<h3>Prepare and Start the Guest Manually</h3>
-<p>This section assumes you have installed QEMU.</p>
-<h4>QEMU -device Definition</h4>
-<p>To add the vhost-scsi device, wwpn=naa.1111111111111111, we made with targetcli use the following device definition with your QEMU call:</p>
-<pre><code class="language-bash">-device vhost-scsi-pci,wwpn=naa.1111111111111111</code></pre>
-<h3>Using QEMU</h3>
-<p>
-This command will create a VM with 16 vCPUs and will have 16GB of memory. It uses an Oracle Linux 9 image which we have installed the UEK-next kernel on to.</p>
-
-<pre><code class="language-bash">$ qemu-system-x86_64 -smp 16 -m 16G -enable-kvm -cpu host \
--hda /work/OL9U4_x86_64.qcow2 -name debug-threads=on \
--serial mon:stdio -vnc :7 \
--device vhost-scsi-pci,wwpn=naa.1111111111111111
-</code></pre>
-<p>Note:Open the VNC client application and establish a connection to localhost:5907. A VM may be accessed with any VNC client program. For instance, you may utilize RealVNC or TightVNC if you’re using Windows. Use the vncviewer software that comes with your Linux distribution if you’re running Linux. Moreover, you may launch a VNC server using display number X. Replace the display number with X, so that, for example, 0 will listen on 5900, 1 on 5901, and so on.
- </p>
-
-<h2>Check Your Guest</h2>
-<p>To see how the target and LUN targetcli created got mapped to the guest OS’s names/IDs run lsscsi in the VM:</p>
-<pre><code class="language-bash">$ lsscsi
-[0:0:1:0]    disk    LIO-ORG  vol0  4.0   /dev/sda
-</code></pre>
-<p>When we created the block device with targetcli we gave it the name “vol0", and we see it above attached to [0:0:1:0]. This is [SCSI host 0: bus 0: target 1: LUN 0] and the OS’s name for the device is sda.</p>
-<p>Instead of sda, we can prevent ourself from overwriting our root disk or wasting a lot of time performing tests on the wrong disk by using the udev name. From the targetcli info command we saw that the wwn for the disk was 5122f2cd-07dc-4eec-a2d4-c122db6a2a81, so in the /dev/disk/by-id dir you will find:
 </p>
-<pre><code class="language-bash">$ ls -l /dev/disk/by-id/scsi-1LIO-ORG_vol0:5122f2cd-07dc-4eec-a2d4-c122db6a2a81
+<div class="info-box">
+  <span class="info-icon"></span>
+  <div class="info-text">
+    <strong>More backstore examples</strong><br>
+More examples on creating backstores can be found in targetcli.
+  </div>
+</div>
+<h3>Instantiate a target
+</h3>
+<p>The InfiniBand ports that are available on the storage array are presented in the WWN context with the following WWPNs, for instance:
+
+</p>
+<ul>
+  <li>0x00000000000000000002c903000e8acd
+</li>
+<li>0x00000000000000000002c903000e8ace</li>
+</ul>
+<p>Instantiate an InfiniBand target, in this example for SRP over Mellanox Connect-X HCAs, on the existing IBLOCK backstore device my_disk (as set up in targetcli):
+
+</p>
+<pre><code class="language-bash">/backstores/iblock/my_disk> /ip_srpt create 0x00000000000000000002c903000e8acd
+Created target 0x00000000000000000002c903000e8acd.
+Entering new node /ib_srpt/0x00000000000000000002c903000e8acd.
+/ib_srpt/0x00...2c903000e8acd></code></pre>
+<p>targetcli automatically changes the working context to the resulting tagged Endpoint.
+
+</p>
+<h3>Export LUNs</h3>
+<p>Declare a LUN for the backstore device, to form a valid SAN storage object:
+
+</p>
+<pre><code class="language-bash">/ib_srpt/0x00...2c903000e8acd> luns/ create /backstores/iblock/my_disk
+Selected LUN 0.
+Successfully created LUN 0.
+Entering new node /ib_srpt/0x00000000000000000002c903000e8acd/luns/lun0.
+/ib_srpt/0x00...acd/luns/lun0>
 </code></pre>
-<p>and you use the "/dev/disk/by-id/scsi-1LIO-ORG_vol0:5122f2cd-07dc-4eec-a2d4-c122db6a2a81" name across reboots (warning that some apps don't like the ":" so you may need to do "\:").</p>
-<h2>Test It Out</h2>
-<pre><code class="language-bash">$$ cat randread.4jobs.fio
-[global]
-bs=4K
-iodepth=128
-direct=1
-ioengine=libaio
-group_reporting
-time_based
-runtime=120
-name=standard-iops
-rw=randread
-numjobs=4
-cpus_allowed=0-3
-[job1]
-# note: some applications don't like the colon in the name so you have to add the backslash
-filename=/dev/disk/by-id/scsi-1LIO-ORG_vol0\:5122f2cd-07dc-4eec-a2d4-c122db6a2a81
-$ fio randread.4jobs.fio
+<p>targetcli per default automatically assigns the default ID '0' to the LUN, and then changes the working context to the SAN storage object. The target is now created, and exports /dev/sdb as LUN 0.
+
+</p>
+<p>Return to the underlying Endpoint as the working context, as no attributes need to be set or modified for standard LUNs:
+
+</p>
+<pre><code class="language-bash">/ib_srpt/0x00...act/luns/lun0> cd <
+Taking you back to /ib_srpt/0x00000000000000000002c903000e8acd.
+/ib_srpt/0x00...2c903000e8acd></code></pre>
+<h3>Define access rights</h3>
+<p>Configure the access rights to allow logins from initiators. This requires setting up individual access rights for each initiator, based on its WWPN.
+
+</p>
+<p>Determine the WWPN for the respective InfiniBand initiator. For instance, for Linux initiator systems, use:
+
+</p>
+<pre><code class="language-bash"># cat /sys/class/infiniband/*/ports/*/gids/0 | sed -e s/fe80/0x0000/ -e 's/\://g'
 </code></pre>
+<p>For a simple setup, allow access to the initiator with the WWPN as determined above:
 
+</p>
+<pre><code class="language-bash">/ib_srpt/0x00...2c903000e8acd> acls/ create 0x00000000000000000002c903000e8be9
+Successfully created Node ACL for 0x00000000000000000002c903000e8be9.
+Created mapped LUN 0.
+Entering new node /ib_srpt/0x00000000000000000002c903000e8acd/acls/
+0x00000000000000000002c903000e8be9.
+/ib_srpt/0x00...2c903000e8be9> cd /</code></pre>
+<p>targetcli per default automatically adds the appropriate mapped LUNs.
 
+</p>
+<h3>Display the object tree
+</h3>
+<p>The resulting InfiniBand SAN object hierarchy looks as follows (displayed from the root object):
 
+</p>
+<pre><code class="language-bash">/> ls
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [1 Storage Object]
+  | | o- my_disk .......................................... [/dev/sdb activated]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [1 Target]
+  | o- 0x00000000000000000002c903000e8acd ............................ [enabled]
+  |   o- acls .......................................................... [1 ACL]
+  |   | o- 0x00000000000000000002c903000e8be9 ................... [1 Mapped LUN]
+  |   |   o- mapped_lun0 ........................................... [lun0 (rw)]
+  |   o- luns .......................................................... [1 LUN]
+  |     o- lun0 .................................... [iblock/my_disk (/dev/sdb)]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]
+/></code></pre>
+<h3>Persist the configuration
+</h3>
+<div class="warning-box">
+  <span class="warning-icon"></span>
+  <div class="warning-text">
+    <strong>Don't forget to use saveconfig!</strong><br>
+Without saveconfig, the LIO configuration will be lost upon rebooting or unloading the target service, as it will revert back to the last saved one.
+  </div>
+</div>
+<p>Use saveconfig from the root context to persist the LIO configuration across LIO reboots:
+
+</p>
+<pre><code/> saveconfig
+WARNING: Saving rtsnode1 current configuration to disk will overwrite your boot settings.
+The current target configuration will become the default boot config.
+Are you sure? Type 'yes': yes
+Making backup of srpt/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/srpt_start.sh
+Making backup of qla2xxx/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/qla2xxx_start.sh
+Making backup of loopback/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/loopback_start.sh
+Making backup of LIO-Target/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/lio_backup-2012-02-27_23:19:37.660264.sh
+Making backup of Target_Core_Mod/ConfigFS with timestamp: 2012-02-27_23:19:37.660264
+Successfully updated default config /etc/target/tcm_backup-2012-02-27_23:19:37.660264.sh
+Generated Target_Core_Mod config: /etc/target/backup/tcm_backup-2012-02-27_23:19:37.660264.sh
+Successfully updated default config /etc/target/lio_start.sh
+Successfully updated default config /etc/target/tcm_start.sh
+/></code></pre>
+<h3>Object tree</h3>
+<p>The resulting object tree looks as follows:
+
+</p>
+<pre><code class="language-bash">o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- fileio ............................................... [0 Storage Object]
+  | o- iblock ............................................... [1 Storage Object]
+  | | o- my_disk .......................................... [/dev/sdb activated]
+  | o- pscsi ................................................ [0 Storage Object]
+  | o- rd_dr ................................................ [0 Storage Object]
+  | o- rd_mcp ............................................... [0 Storage Object]
+  o- ib_srpt ........................................................ [1 Target]
+    o- 0x00000000000000000002c903000e8acd ............................ [enabled]
+      o- acls .......................................................... [1 ACL]
+      | o- 0x00000000000000000002c903000e8be9 ................... [1 Mapped LUN]
+      |   o- mapped_lun0 ........................................... [lun0 (rw)]
+      o- luns .......................................................... [1 LUN]
+        o- lun0 .................................... [iblock/my_disk (/dev/sdb)]
+  o- iscsi .......................................................... [0 Target]
+  o- loopback ....................................................... [0 Target]
+  o- qla2xxx ........................................................ [0 Target]</code></pre>
+<h2>Specifications
+</h2>
+<p>SRP was not approved as an official standard. The following specifications are available as available as T10 Working Drafts:
+
+</p>
+<ul>
+  <li>SCSI RDMA Protocol (SRP): SRP defines a SCSI protocol mapping onto the InfiniBand (tm) Architecture and/or functionally similar cluster protocols. ANSI INCITS 365-2002. Status: Final Draft. 2002-07-03
+</li>
+</ul>
 </section>
 
   </main>
 
-  
+  <script>
+    
+</script>
 
  <button id="back-to-top" aria-label="Back to top">↑</button>
+
+  <footer>
+    <p>Based on the original work at
+       <a href="http://linux-iscsi.org" target="_blank" rel="noopener">linux-iscsi.org</a>, and updated by
+      <a href="www.linkedin.com/in/max-christie-005022255" target = "_blank">
+        Max Christie
+        </a>
+      .Thanks to Nicholas Bellinger for creating LIO.
+      </a>
+    </p>
+  </footer>
+ 
 </body>
 </html>
