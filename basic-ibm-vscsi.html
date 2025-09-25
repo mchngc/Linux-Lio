@@ -6,26 +6,18 @@
   <title>Linux-IO Documentation</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <!-- Highlight.js core -->
+  <!-- Highlight.js core + Python only -->
 <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
-      id="hljs-theme-light">
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
-      id="hljs-theme-dark" disabled>
-
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<!-- Prism.js themes -->
-<link id="prism-light" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
-<link id="prism-dark" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+
+<!-- Lucide icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <!-- Shared site JavaScript -->
 <script src="js/main.js"></script>
 
-<!-- Prism.js -->
-<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
 </head>
 <body>
   <header>
@@ -41,7 +33,7 @@
   <div class="header-right">
     <nav id="header-nav">
       <ul>
-        <li><a href="#overview">Overview</a></li>
+         
         <li class="dropdown-parent">
           <a href="#" id="code-toggle">Code ▾</a>
           <ul class="dropdown">
@@ -98,7 +90,7 @@
 
 <h2>Modules</h2>
 <p>ismod output:</p>
-<pre><code class="language-bash">Module                  Size  Used by
+<pre><code>Module                  Size  Used by
 ibmvscsis              22024  4 
 libsrp                  9242  1 ibmvscsis
 scsi_tgt               15597  1 libsrp
