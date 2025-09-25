@@ -1366,6 +1366,16 @@ header nav ul li .dropdown.open {
     width: 100%;
   }
 }
+body.dark-mode code.hljs {
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
+
+body.dark-mode .hljs-keyword { color: #c586c0; }
+body.dark-mode .hljs-string  { color: #ce9178; }
+body.dark-mode .hljs-number  { color: #b5cea8; }
+body.dark-mode .hljs-comment { color: #6a9955; }
+
 
 
 
