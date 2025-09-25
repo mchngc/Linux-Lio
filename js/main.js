@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('pre code.language-python').forEach((el) => {
+    hljs.highlightElement(el);
+  });
+  
   // ---------------- Sidebar dropdowns ----------------
   document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
     toggle.addEventListener('click', function(e) {
